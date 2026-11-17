@@ -358,6 +358,11 @@ input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{
 .sev.ec,.hi2.ec{background:color-mix(in srgb,var(--ec) 20%,#fff);border-color:color-mix(in srgb,var(--ec) 38%,#fff);color:color-mix(in srgb,var(--ec) 72%,#000)}
 .sev.ec .tm,.sev.ec .pl,.hi2.ec .tm,.hi2.ec .pl{color:inherit;opacity:.85}
 .sev.ec.now,.hi2.ec.now{border-left-color:var(--ec)}}
+
+.ptop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.ptop .ptitle{flex:1;min-width:0}
+.rfbtn{flex:none;margin-top:2px;width:26px;height:26px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--sub);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.rfbtn:active{transform:scale(.92)}.rfbtn.spin{animation:rfspin .8s linear infinite}
+@keyframes rfspin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -760,7 +765,7 @@ function vHome(){
   const[y,m]=UI.month.split('-').map(Number);const sel=UI.sel;const selEv=eventsOn(sel);
   const cw=(UI.colW&&UI.colW.length===3?UI.colW:[1.18,1,1.05]);
   const pt=(D.settings.title||'').trim();
-  return `${pt?`<div class="ptitle">${esc(pt)}</div>`:''}<div class="wide ${pt?'hast':''}" style="--c1:${cw[0]}fr;--c2:${cw[1]}fr;--c3:${cw[2]}fr">${heroHTML()}
+  return `<div class="ptop">${pt?`<div class="ptitle">${esc(pt)}</div>`:'<span></span>'}<button class="rfbtn" data-a="homeRefresh" title="새로고침" aria-label="새로고침">↻</button></div><div class="wide ${pt?'hast':''}" style="--c1:${cw[0]}fr;--c2:${cw[1]}fr;--c3:${cw[2]}fr">${heroHTML()}
   <div class="col">
    <div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(UI.calF,'calF',true,true):''}<div class="cal hcal">${calCells(y,m,UI.calF,t,sel)}</div></div>
    <div class="card"><h2>${sel===t?'오늘':fmtK(sel)} 일정 <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 추가</button></h2>${selEv.length?selEv.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요 🎈</div>'}</div>
@@ -1092,6 +1097,7 @@ const A={
    $('#modal').classList.remove('on');$('#box').innerHTML='';
    lsSet(K_GH,{owner:o,repo:r,token:t,path:'data/family.json'});S={busy:false,at:0,err:'',sha:null,state:t?'rw':'ro'};dirty=true;toast('연결했어요. 동기화 중…');sync(true).then(render)},
  clearGh(){$('#modal').classList.remove('on');$('#box').innerHTML='';try{localStorage.removeItem(K_GH)}catch(e){}S.err='';S.at=0;toast('연결을 해제했어요 (이 기기의 데이터는 남아요)');render()},
+ homeRefresh(d,el){el.classList.add('spin');Promise.all([gh()?sync(true):null,loadWx(true)]).catch(()=>{}).then(()=>{if(!gh())toast('새로고침했어요');if(!modalOpen())render()})},
  syncNow(){if(!gh()){toast('먼저 GitHub를 연결하세요');return}$('#modal').classList.remove('on');$('#box').innerHTML='';sync(true).then(render)},
  exportData(){const txt=JSON.stringify(D);openModal(`<h2>백업 내보내기</h2><div class="muted">아래 내용을 전체 복사해서 보관하세요.</div><textarea id="f_x" style="min-height:160px" readonly>${esc(txt)}</textarea><div class="row"><button class="btn pri" data-a="copyX">복사</button><button class="btn" data-a="close">닫기</button></div>`)},
  copyX(){const t=$('#f_x');t.select();try{navigator.clipboard.writeText(t.value).then(()=>toast('복사했어요'),()=>{document.execCommand('copy');toast('복사했어요')})}catch(e){document.execCommand('copy');toast('복사했어요')}},
