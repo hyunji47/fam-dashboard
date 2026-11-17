@@ -145,17 +145,6 @@ nav#nav button.on{background:var(--accent2);color:var(--accent)}
 .ttk{padding:6px 0;border-top:1px solid var(--line)}
 .ttk:first-of-type{border-top:0}
 /* ===== 와이드(한눈에) 홈 ===== */
-.hero{padding:12px 18px}
-.hero .row{gap:16px}
-.hero .date{font-size:22px;font-weight:700;line-height:1.2}
-.hero .clk{font-size:34px;font-weight:300;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
-.hero .hi{font-size:13px;color:var(--sub)}
-.hero .wxs{display:flex;align-items:center;gap:10px;margin-left:auto}
-.hero .wxs .ic{font-size:30px}
-.hero .wxs b{font-size:22px}
-.hero .fc2{display:flex;gap:6px}
-.hero .fc2 div{text-align:center;font-size:12px;background:var(--card2);border-radius:10px;padding:3px 8px}
-.hero .wxs .sub2{font-size:12px;color:var(--sub)}
 .wide{display:grid;gap:12px;grid-template-columns:1fr}
 .wide .whead{margin:0}
 .wide .col{min-width:0}
@@ -218,15 +207,6 @@ nav#nav button.on{box-shadow:0 2px 10px -2px rgba(0,0,0,.25);border:1px solid va
 .cal .d.o .n,.cal .d.o .tag{opacity:.35}
 .chatcal .cal .d{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
 .chatcal .cal .d .n{margin:0}
-@media(max-width:899px){
-.hero .row{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
-.hero .clk{grid-column:2;grid-row:1;text-align:right;font-size:32px}
-.hero .row>div:first-child{grid-column:1;grid-row:1;min-width:0}
-.hero .wxs{grid-column:1;grid-row:2;margin:0;min-width:0}
-.hero .row>.btn{grid-column:2;grid-row:2;justify-self:end}
-.hero .fc2{grid-column:1/-1;grid-row:3;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.hero .fc2 div{padding:4px 2px}
-}
 .chips.one{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:4px}.chips.one::-webkit-scrollbar{display:none}.chips.one .chip{flex:0 0 auto;white-space:nowrap;padding:4px 9px;font-size:12.5px}
 .hs{position:relative;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin-top:6px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
 .hi2{flex:0 0 auto;min-width:96px;max-width:150px;background:var(--card2);border-radius:10px;padding:6px 9px;font-size:13px}
@@ -241,6 +221,25 @@ nav#nav button.on .i svg .f{fill-opacity:.35}
 @media(max-width:600px){.cal .tag.hd{font-size:9.5px;height:auto;width:auto;border-radius:0;display:block;padding:0;margin:1px 0 0;background:none;color:var(--danger);line-height:1.2;font-weight:700}}
 .cal .d{position:relative}.cal .edot{display:none;position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%}
 @media(max-width:600px){.hcal .edot{display:block}.hcal .tag:not(.hd):not(.sm2){display:none}.hcal .more{display:none}.hcal .d{min-height:46px;padding-top:2px}}
+/* ===== 홈 상단: 넓을 땐 한 줄(A), 좁을 땐 날씨 우선(C) ===== */
+.hero{padding:12px 18px}
+.hero .clk{font-weight:300;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.hero .hi{font-size:13px;color:var(--sub)}.hero .sub2{font-size:12.5px;color:var(--sub)}.hero .sub3{font-size:10.5px;color:var(--sub)}
+.hero .date{font-size:20px;font-weight:700;line-height:1.2}
+.hero .vsep{width:1px;align-self:stretch;background:var(--line);margin:2px 0}
+.hA{display:flex;align-items:center;gap:16px}.hA .hd1{flex:1;min-width:0}.hA .clk{font-size:34px}
+.hA .hw{display:flex;align-items:center;gap:10px}.hA .hw .ic{font-size:30px}.hA .hw>b{font-size:24px}
+.hC{display:none}
+@media(max-width:899px){
+.hA{display:none}
+.hC{display:block}
+.hC .c1{display:flex;align-items:center;gap:8px}.hC .c1 .ic{font-size:36px;line-height:1}.hC .c1>b{font-size:36px;font-weight:600;line-height:1}
+.hC .rt{margin-left:auto;text-align:right}.hC .clk{font-size:26px}.hC .dt{font-size:14px;font-weight:700;margin-top:2px}
+.hC .c2{display:flex;align-items:center;gap:8px;margin-top:8px}.hC .c2 .sub2{flex:1;min-width:0}
+.hC .fc2{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.hC .fc2 div{text-align:center;font-size:13px;background:var(--card2);border-radius:10px;padding:5px 2px;display:flex;flex-direction:column;gap:1px}
+.hC .fc2 span{font-size:11px;color:var(--sub)}.hC .fc2 b{font-weight:600}
+}
 </style>
 </head>
 <body>
@@ -571,11 +570,18 @@ function mealToday(){
   return `<div class="card"><h2>🍱 오늘 급식</h2>${sch.length>1?`<div class="chips">${sch.map(x=>`<span class="chip ${x.code===cur.code?'on':''}" data-a="mealTab" data-id="${esc(x.code)}">${esc(x.name)}</span>`).join('')}</div>`:''}<div class="muted" style="margin-bottom:6px">🏫 ${esc(cur.name)} · ${esc(cur.who)}</div><div class="lunch" style="background:var(--card2);border-radius:10px;padding:8px 10px;font-size:15px"><span data-meal='${esc(JSON.stringify({office:cur.office,code:cur.code,name:cur.name}))}' data-off="0" data-today="1">불러오는 중…</span></div></div>`}
 function greet(){const h=new Date().getHours();return h<6?'새벽이에요':h<12?'좋은 아침이에요':h<18?'즐거운 오후예요':'편안한 저녁이에요'}
 function heroHTML(){
-  const d=new Date();let wx='';
-  if(WX){const c=WX.cur,dd=WX.daily,[ic]=WMO(c.weather_code);const rain=(dd.precipitation_probability_max[0]||0)>=50,cold=dd.temperature_2m_max[0]<6,hot=dd.temperature_2m_max[0]>=30;
-    wx=`<div class="wxs"><span class="ic">${ic}</span><div><b>${Math.round(c.temperature_2m)}°</b><div class="sub2" title="${esc(wxSrc())}">${esc((D.settings.wx||{}).name||'')} · ${Math.round(dd.temperature_2m_min[0])}~${Math.round(dd.temperature_2m_max[0])}°${rain?' · ☂️ 우산!':cold?' · 🧣 따뜻하게!':hot?' · 💧 물 챙기기':''}</div><div class="sub2" style="font-size:10px">${WX.src==='kma-om'?'기상청 모델':'Open-Meteo'}</div></div></div><div class="fc2">${dd.time.slice(1,6).map((t,i)=>`<div>${DOW[pd(t).getDay()]}<br>${WMO(dd.weather_code[i+1])[0]}<br>${Math.round(dd.temperature_2m_max[i+1])}°</div>`).join('')}</div>`}
-  else wx=`<div class="wxs muted">날씨 불러오는 중…</div>`;
-  return `<div class="card hero whead"><div class="row"><div><div class="date">${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[d.getDay()]}요일</div><div class="hi">${greet()}</div></div><div class="clk" id="clk">${pad(d.getHours())}:${pad(d.getMinutes())}</div>${wx}<button class="btn sm" data-a="themeOpen" title="테마 색">테마</button></div></div>`}
+  const d=new Date();const dt=`${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[d.getDay()]}요일`,tm=pad(d.getHours())+':'+pad(d.getMinutes());
+  let ic='',temp='',info='',fc='',src='';
+  if(WX){const c=WX.cur,dd=WX.daily;ic=WMO(c.weather_code)[0];temp=Math.round(c.temperature_2m)+'°';
+    const rain=(dd.precipitation_probability_max[0]||0)>=50,cold=dd.temperature_2m_max[0]<6,hot=dd.temperature_2m_max[0]>=30;
+    info=`${esc((D.settings.wx||{}).name||'')} · ${Math.round(dd.temperature_2m_min[0])}~${Math.round(dd.temperature_2m_max[0])}°${rain?' · ☂️ 우산!':cold?' · 🧣 따뜻하게!':hot?' · 💧 물 챙기기':''}`;
+    src=WX.src==='kma-om'?'기상청 모델':'Open-Meteo';
+    fc=dd.time.slice(1,6).map((t,i)=>`<div><span>${DOW[pd(t).getDay()]}</span>${WMO(dd.weather_code[i+1])[0]}<b>${Math.round(dd.temperature_2m_max[i+1])}°</b></div>`).join('')}
+  return `<div class="card hero whead">
+   <div class="hA"><div class="hd1"><div class="date">${dt}</div><div class="hi">${greet()}</div></div><div class="clk">${tm}</div><i class="vsep"></i>
+    ${WX?`<div class="hw"><span class="ic">${ic}</span><b>${temp}</b><div><div class="sub2" title="${esc(wxSrc())}">${info}</div><div class="sub3">${src}</div></div></div>`:`<div class="hw muted">날씨 불러오는 중…</div>`}</div>
+   <div class="hC"><div class="c1"><span class="ic">${ic}</span><b>${temp}</b><div class="rt"><div class="clk">${tm}</div><div class="dt">${dt}</div><div class="hi">${greet()}</div></div></div>
+    <div class="c2"><div class="sub2" title="${esc(wxSrc())}">${WX?info:'날씨 불러오는 중…'}</div></div>${WX?`<div class="fc2">${fc}</div>`:''}</div></div>`}
 function vHome(){
   const t=TODAY(),d=new Date();
   if(!members().length)return head('우리집')+`<div class="card"><h2>👋 처음이시네요</h2><p class="muted">먼저 가족 구성원을 등록해 주세요. 이름·색·생년월일(예방접종 일정 계산용)·학교(급식 조회용)를 넣을 수 있어요.</p><button class="btn pri block" data-a="addMem">가족 추가하기</button></div>`+wxCard();
@@ -611,7 +617,7 @@ function calCells(y,m,f,t,sel){
   return cells}
 function confetti(){const e=['🎉','⭐','🌟','🎈','✨','🍭'];for(let i=0;i<28;i++){const el=document.createElement('span');el.className='cf';el.textContent=e[i%e.length];el.style.left=Math.random()*100+'vw';el.style.animationDelay=(Math.random()*.7)+'s';el.style.fontSize=(18+Math.random()*20)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),3600)}}
 let LASTDAY=TODAY();
-setInterval(()=>{const c=$('#clk');if(c){const d=new Date();c.textContent=pad(d.getHours())+':'+pad(d.getMinutes())}
+setInterval(()=>{const d=new Date(),hm=pad(d.getHours())+':'+pad(d.getMinutes());document.querySelectorAll('.hero .clk').forEach(c=>c.textContent=hm);
   if(UI.tab==='home'&&!modalOpen()&&nowSig()!==LASTSIG)render();
   if(TODAY()!==LASTDAY){const was=UI.chatDay===LASTDAY||!UI.chatDay;LASTDAY=TODAY();if(was)UI.chatDay='';UI.sel=UI.sel===TODAY()?UI.sel:UI.sel;render()}},15000);
 
