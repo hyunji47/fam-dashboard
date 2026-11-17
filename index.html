@@ -160,7 +160,10 @@ nav#nav button.on{background:var(--accent2);color:var(--accent)}
 .wide .col{min-width:0}
 @media(min-width:1000px){
   main:has(.wide){max-width:none;padding:14px 18px 12px}
-  .wide{grid-template-columns:1.18fr 1fr 1.05fr;grid-template-rows:auto minmax(0,1fr);height:calc(100dvh - 26px);align-items:stretch}
+  .wide{grid-template-columns:var(--c1,1.18fr) 12px var(--c2,1fr) 12px var(--c3,1.05fr);column-gap:0;row-gap:12px;grid-template-rows:auto minmax(0,1fr);height:calc(100dvh - 26px);align-items:stretch}
+  .wide .rz{display:block;cursor:col-resize;position:relative;touch-action:none}
+  .wide .rz::after{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;border-radius:2px;background:var(--line);transition:.15s}
+  .wide .rz:hover::after,.wide .rz.drag::after{background:var(--accent);left:4px;width:4px}
   .wide .whead{grid-column:1/-1}
   .wide .col{overflow-y:auto;min-height:0;padding:2px 6px 10px 2px;scrollbar-width:thin}
   .wide .card{margin-bottom:14px}
@@ -231,6 +234,12 @@ nav#nav button.on{box-shadow:0 2px 10px -2px rgba(0,0,0,.25);border:1px solid va
 nav#nav button .i{color:var(--accent)}
 nav#nav button .i svg .f{fill-opacity:.2}
 nav#nav button.on .i svg .f{fill-opacity:.35}
+.rz{display:none}
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--sub) 28%,transparent) transparent}
+*::-webkit-scrollbar{width:6px;height:6px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--sub) 25%,transparent);border-radius:6px}
+*::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--sub) 50%,transparent)}
 </style>
 </head>
 <body>
@@ -574,18 +583,21 @@ function vHome(){
   const notice=live('notices').sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||b.u-a.u).slice(0,3);
   const soon=kids().flatMap(dueSoon).slice(0,4);const sch=schools();
   const[y,m]=UI.month.split('-').map(Number);const sel=UI.sel;const selEv=eventsOn(sel);
-  return `<div class="wide">${heroHTML()}
+  const cw=(UI.colW&&UI.colW.length===3?UI.colW:[1.18,1,1.05]);
+  return `<div class="wide" style="--c1:${cw[0]}fr;--c2:${cw[1]}fr;--c3:${cw[2]}fr">${heroHTML()}
   <div class="col">
    <div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(UI.calF,'calF',true,true):''}<div class="cal">${calCells(y,m,UI.calF,t,sel)}</div></div>
    <div class="card"><h2>${sel===t?'오늘':fmtK(sel)} 일정 <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 추가</button></h2>${selEv.length?selEv.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요 🎈</div>'}</div>
    <div class="card"><h2>⏭️ 앞으로 7일</h2>${up.length?up.slice(0,8).map(e=>evRow(e,true)).join(''):'<div class="empty">예정된 일정이 없어요</div>'}</div>
   </div>
+  <div class="rz" data-rz="0" title="드래그해서 넓이 조절 · 더블클릭하면 원래대로"></div>
   <div class="col">
    ${schoolToday()}
    ${mealToday()}
    <div class="card"><h2>💬 가족 대화 <span class="sp"></span><button class="btn sm" data-a="tab" data-id="chat">전체 보기</button></h2><div class="chat chatbox" style="max-height:250px;overflow-y:auto;padding-right:2px">${bubbles(chatMsgs(0),false)}</div>${composeHTML()}</div>
    ${soon.length?`<div class="card"><h2>💉 곧 챙길 건강 일정</h2>${soon.map(o=>`<div class="ev"><div class="bar" style="background:${o.over?'var(--danger)':'var(--accent)'}"></div><div><div class="t">${esc(o.name)}</div><div class="muted">${fmtY(ymd(o.s))} ~ ${fmtY(ymd(o.e))}${o.over?' · 기간 지남':''}</div></div></div>`).join('')}<div class="muted" style="margin-top:6px">참고용이에요. 정확한 일정은 소아과·예방접종도우미에서 확인하세요.</div></div>`:''}
   </div>
+  <div class="rz" data-rz="1" title="드래그해서 넓이 조절 · 더블클릭하면 원래대로"></div>
   <div class="col">${members().map(memTodoCard).join('')}</div></div>`}
 function calCells(y,m,f,t,sel){
   const first=new Date(y,m-1,1),start=addD(first,-first.getDay());
@@ -892,6 +904,20 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isCo
 /* ============ 시작 ============ */
 render();loadWx();
 if(gh())sync(false);
+
+/* 와이드 화면 열 너비 조절 */
+(function(){let st=null;
+  document.addEventListener('pointerdown',e=>{const h=e.target.closest('.rz');if(!h)return;const w=h.closest('.wide');const cols=[...w.querySelectorAll(':scope>.col')];if(cols.length<3)return;
+    e.preventDefault();h.setPointerCapture&&h.setPointerCapture(e.pointerId);h.classList.add('drag');
+    st={h,w,i:+h.dataset.rz,x:e.clientX,px:cols.map(c=>c.getBoundingClientRect().width)}});
+  document.addEventListener('pointermove',e=>{if(!st)return;const dx=e.clientX-st.x,p=st.px.slice(),a=st.i,b=a+1,MIN=220;
+    let na=p[a]+dx,nb=p[b]-dx;if(na<MIN){nb-=MIN-na;na=MIN}if(nb<MIN){na-=MIN-nb;nb=MIN}p[a]=na;p[b]=nb;
+    const tot=p.reduce((x,y)=>x+y,0);const fr=p.map(v=>+(v/tot*3.23).toFixed(3));st.fr=fr;
+    st.w.style.setProperty('--c1',fr[0]+'fr');st.w.style.setProperty('--c2',fr[1]+'fr');st.w.style.setProperty('--c3',fr[2]+'fr')});
+  const end=()=>{if(!st)return;st.h.classList.remove('drag');if(st.fr){UI.colW=st.fr;saveUI()}st=null};
+  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+  document.addEventListener('dblclick',e=>{if(!e.target.closest('.rz'))return;UI.colW=null;saveUI();render()});
+})();
 </script>
 </body>
 </html>
