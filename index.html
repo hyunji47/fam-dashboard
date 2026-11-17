@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://api.open-meteo.com https://geocoding-api.open-meteo.com https://open.neis.go.kr https://api.github.com https://raw.githubusercontent.com; font-src 'self' data:; base-uri 'none'; object-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data:; connect-src https://api.open-meteo.com https://geocoding-api.open-meteo.com https://open.neis.go.kr https://api.github.com https://raw.githubusercontent.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; base-uri 'none'; object-src 'none'; form-action 'none'">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="우리집">
@@ -136,8 +136,8 @@ nav#nav button.on{background:var(--accent2);color:var(--accent)}
 .per b{background:var(--accent);color:#fff;border-radius:6px;min-width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
 .sg{display:grid;grid-template-columns:repeat(var(--nd,5),1fr);gap:8px}
 .sgc{min-width:0}.sgc h3{font-size:13px;margin:0 0 6px;text-align:center;color:var(--sub)}.sgc.today h3{color:var(--accent)}
-.sev{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:6px 8px;margin-bottom:6px;cursor:pointer;font-size:13px}
-.sev.k-academy{border-left-color:#e08a00}.sev.k-etc{border-left-color:#8a8fa3}.sev.now{box-shadow:0 0 0 2px var(--accent)}
+.sev{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin-bottom:6px;cursor:pointer;font-size:13px}
+.sev.now{border-left:6px solid var(--accent)}.sev.now.k-academy{border-left-color:#e08a00}.sev.now.k-etc{border-left-color:#8a8fa3}
 .sev .tm{font-size:11.5px;color:var(--sub)}.sev .ti{font-weight:600;word-break:keep-all}.sev .pl{font-size:11.5px;color:var(--sub)}
 .dtabs{display:none}
 @media(max-width:700px){.sg{display:block}.sgc:not(.sel){display:none}.sgc h3{display:none}.dtabs{display:flex}}
@@ -268,17 +268,6 @@ html[data-kt=unicorn] .btn,html[data-kt=unicorn] .chip{border-radius:99px}
 html[data-kt=unicorn] .btn.pri{background:linear-gradient(135deg,#a78bfa,#f472b6);border-color:transparent;color:#fff}
 html[data-kt=unicorn] .top h1::before{content:'🦄 '}
 html[data-kt=unicorn] .hero .date::after{content:' 🦄'}
-:root[data-kt=pixel]{--bg:#fdf3d6;--card:#fffdf2;--card2:#ffe9a8;--text:#1f1a3a;--sub:#5c5683;--line:#1f1a3a;--bd:#1f1a3a;--accent:#e63b5c;--shadow:4px 4px 0 #1f1a3a}
-html[data-kt=pixel]{background:#fdf3d6 linear-gradient(rgba(31,26,58,.07) 1px,transparent 1px) 0 0/16px 16px,linear-gradient(90deg,rgba(31,26,58,.07) 1px,transparent 1px) 0 0/16px 16px}
-html[data-kt=pixel] body{background:transparent;font-family:ui-monospace,"Courier New","Malgun Gothic","Apple SD Gothic Neo",monospace;-webkit-font-smoothing:none}
-html[data-kt=pixel] *:not(.edot){border-radius:0!important}
-html[data-kt=pixel] .card{border:3px solid var(--line)}
-html[data-kt=pixel] .btn,html[data-kt=pixel] .chip,html[data-kt=pixel] input,html[data-kt=pixel] select,html[data-kt=pixel] textarea{border:2px solid var(--line)}
-html[data-kt=pixel] .btn.pri{background:var(--accent);color:#fff;box-shadow:2px 2px 0 var(--line)}
-html[data-kt=pixel] .chip.on{box-shadow:2px 2px 0 var(--line)}
-html[data-kt=pixel] .top h1::before{content:'👾 '}
-html[data-kt=pixel] .hero .date::after{content:' 👾'}
-html[data-kt=pixel] .cal,html[data-kt=pixel] .cal .d{border-color:var(--line)}
 #chatpage{display:flex;flex-direction:column;height:calc(100dvh - 150px - env(safe-area-inset-bottom));min-height:360px;margin-bottom:0}
 @media(min-width:900px){#chatpage{height:calc(100dvh - 100px)}}
 #chatpage .chat{flex:1 1 auto;min-height:0;overflow-y:auto;margin-bottom:12px}
@@ -286,6 +275,39 @@ html[data-kt=pixel] .cal,html[data-kt=pixel] .cal .d{border-color:var(--line)}
 #chatpage .compose{position:static;flex:0 0 auto;margin-top:0;box-shadow:none}
 .ptitle{font-size:24px;font-weight:800;line-height:1.2;padding:2px 4px 10px;letter-spacing:-.3px;word-break:keep-all}
 @media(min-width:1000px){.wide.hast{height:calc(100dvh - 26px - 44px)}}
+
+/* 픽셀 게임 테마 (레트로 RPG 대화창 느낌) */
+:root[data-kt=pixel]{--bg:#86cf72;--card:#f8f8f0;--card2:#ece6c8;--text:#383850;--sub:#6a6a86;--line:#d3cba6;--bd:#d3cba6;--accent:#e8483f;--accent2:#ffe9a3;--shadow:0 4px 0 rgba(40,40,70,.28)}
+html[data-kt=pixel]{background:#86cf72 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%2386cf72'/%3E%3Cg fill='%2362b255'%3E%3Cpath d='M6 12h2v2H6zM4 14h2v2H4zM8 14h2v2H8z'/%3E%3Cpath d='M30 34h2v2h-2zM28 36h2v2h-2zM32 36h2v2h-2z'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Crect x='36' y='10' width='4' height='4'/%3E%3Crect x='14' y='38' width='4' height='4'/%3E%3C/g%3E%3Crect x='37' y='11' width='2' height='2' fill='%23ffd23f'/%3E%3Crect x='15' y='39' width='2' height='2' fill='%23ffd23f'/%3E%3C/svg%3E") 0 0/48px 48px;image-rendering:pixelated}
+html[data-kt=pixel] body{background:transparent}
+html[data-kt=pixel] .card{border:4px solid #383850;border-radius:10px;box-shadow:inset 0 0 0 3px #f8f8f0,inset 0 0 0 5px #cfc7a0,0 4px 0 rgba(40,40,70,.3)}
+html[data-kt=pixel] .hero{background:#e8483f;color:#fff;box-shadow:inset 0 0 0 3px #e8483f,inset 0 0 0 5px #ffb4a8,0 4px 0 rgba(40,40,70,.3)}
+html[data-kt=pixel] .hero .clk,html[data-kt=pixel] .hero .date,html[data-kt=pixel] .hero .hi,html[data-kt=pixel] .hero .sub2,html[data-kt=pixel] .hero .sub3,html[data-kt=pixel] .hero .dt,html[data-kt=pixel] .hero b,html[data-kt=pixel] .hero .muted{color:#fff}
+html[data-kt=pixel] .hero .vsep{background:#ffb4a8}
+html[data-kt=pixel] .hC .fc2 div{background:#c93a32;color:#fff}html[data-kt=pixel] .hC .fc2 span{color:#ffd6cf}
+html[data-kt=pixel] nav#nav{background:#f8f8f0;border-color:#383850}
+@media(min-width:900px){html[data-kt=pixel] nav#nav{border-right:4px solid #383850}}
+html[data-kt=pixel] nav#nav button{border-radius:6px}
+html[data-kt=pixel] nav#nav button.on{background:#ffe9a3;border:2px solid #383850;box-shadow:0 3px 0 #383850;color:#383850}
+@media(min-width:900px){html[data-kt=pixel] nav#nav button.on::before{content:'▶';font-size:10px;margin-right:2px}}
+html[data-kt=pixel] .btn,html[data-kt=pixel] .chip{border:3px solid #383850;border-radius:8px;background:#f8f8f0;box-shadow:0 3px 0 #383850}
+html[data-kt=pixel] .btn:active,html[data-kt=pixel] .chip:active{transform:translateY(2px);box-shadow:0 1px 0 #383850}
+html[data-kt=pixel] .btn.pri{background:#e8483f;color:#fff}
+html[data-kt=pixel] .chip.on{background:#ffe9a3;color:#383850;border-color:#383850}
+html[data-kt=pixel] .chip:not(.on){opacity:.75}
+html[data-kt=pixel] input,html[data-kt=pixel] select,html[data-kt=pixel] textarea{border:3px solid #383850;border-radius:8px;background:#fff}
+html[data-kt=pixel] .prog{background:#ddd8c0;border:2px solid #383850;border-radius:8px;padding:1px;height:12px}
+html[data-kt=pixel] .prog i{background:#58d058;border-radius:6px;display:block;height:100%}
+html[data-kt=pixel] .bb{border:3px solid #383850;border-radius:8px}
+html[data-kt=pixel] .msg.me .bb{background:#e8483f;color:#fff}
+html[data-kt=pixel] .compose{border-color:#383850;border-width:3px;background:#ece6c8}
+html[data-kt=pixel] .cal{border:3px solid #383850;border-radius:8px}
+html[data-kt=pixel] .top h1::before{content:'🎮 '}
+html[data-kt=pixel] .hero .date::after{content:' 🎮'}
+/* 글꼴 */
+html[data-font] body,html[data-font] button,html[data-font] input,html[data-font] select,html[data-font] textarea{font-family:var(--ff)}
+html[data-font]{font-synthesis:none}
+html[data-fw] *{font-weight:400!important}
 </style>
 </head>
 <body>
@@ -580,9 +602,31 @@ function meSel(){return ME&&mem(ME)?ME:null}
 const PALETTE=[['#2f6bff','파랑'],['#6c5ce7','보라'],['#e5489b','분홍'],['#e5484d','빨강'],['#ff7a59','주황'],['#e0a100','노랑'],['#1f9d55','초록'],['#0ea5a5','청록'],['#3b4252','회색']];
 const BGS=[['#ffffff','흰색'],['#f3efe6','베이지'],['#eaf2ff','하늘'],['#fdeef4','분홍'],['#eaf6ee','연두'],['#f1edfb','라벤더'],['#101418','블랙'],['#13203a','네이비'],['#12302a','숲'],['#2b1a26','와인']];
 const MODES=[['auto','자동'],['light','라이트'],['dark','다크']];
-const KT=[['','없음',''],['princess','공주풍','👑'],['unicorn','유니콘·오로라','🦄'],['pixel','픽셀아트','👾']];
+// [id, 이름, font-family, 스타일시트 URL, 굵기 있음]
+const FONTS=[
+['','기본 (시스템)','',null,1],
+['cute','귀여운 · 주아',"'Jua'",'https://fonts.googleapis.com/css2?family=Jua&display=swap',0],
+['pixel','픽셀 · 갈무리',"'Galmuri11','Galmuri9'",'https://cdn.jsdelivr.net/npm/galmuri/dist/galmuri.css',1],
+['gamja','손글씨 · 감자꽃',"'Gamja Flower'",'https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap',0],
+['gaegu','손글씨 · 개구',"'Gaegu'",'https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap',1],
+['poor','손글씨 · 푸어스토리',"'Poor Story'",'https://fonts.googleapis.com/css2?family=Poor+Story&display=swap',0],
+['single','손글씨 · 싱글데이',"'Single Day'",'https://fonts.googleapis.com/css2?family=Single+Day&display=swap',0],
+['hime','둥근 · 하이멜로디',"'Hi Melody'",'https://fonts.googleapis.com/css2?family=Hi+Melody&display=swap',0],
+['yeon','둥근 · 연성',"'Yeon Sung'",'https://fonts.googleapis.com/css2?family=Yeon+Sung&display=swap',0],
+['dohyeon','굵은 · 도현',"'Do Hyeon'",'https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap',0],
+['gothic','고딕 · 나눔고딕',"'Nanum Gothic'",'https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap',1],
+['plex','고딕 · IBM Plex Sans KR',"'IBM Plex Sans KR'",'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;700&display=swap',1],
+['myeong','명조 · 나눔명조',"'Nanum Myeongjo'",'https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap',1],
+['song','명조 · 송명',"'Song Myung'",'https://fonts.googleapis.com/css2?family=Song+Myung&display=swap',0],
+['gugi','개성 · 구기',"'Gugi'",'https://fonts.googleapis.com/css2?family=Gugi&display=swap',0],
+['dokdo','붓글씨 · 동해독도',"'East Sea Dokdo'",'https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap',0]];
+function applyFont(){const r=document.documentElement,f=FONTS.find(x=>x[0]===(UI.font||''));
+  if(!f||!f[0]){delete r.dataset.font;delete r.dataset.fw;r.style.removeProperty('--ff');return}
+  r.dataset.font='x';if(f[4])delete r.dataset.fw;else r.dataset.fw='1';r.style.setProperty('--ff',f[2]+',"Apple SD Gothic Neo","Malgun Gothic",sans-serif');
+  if(!document.getElementById('f_'+f[0])){const l=document.createElement('link');l.id='f_'+f[0];l.rel='stylesheet';l.href=f[3];document.head.appendChild(l)}}
+const KT=[['','없음',''],['princess','공주풍','👑'],['unicorn','유니콘·오로라','🦄'],['pixel','픽셀 게임','🎮']];
 function themeBox(){const c=(UI.color||'#2f6bff').toLowerCase(),bg=(UI.bg||'').toLowerCase();
-  return `<div class="themeBox"><div class="lbl2" style="margin-top:0">어린이 테마 <span class="muted">(이 기기에만 적용)</span></div><div class="chips">${KT.map(k=>`<span class="chip ${(UI.kt||'')===k[0]?'on':''}" data-a="setKT" data-id="${k[0]}">${k[2]} ${k[1]}</span>`).join('')}</div>${UI.kt?'<div class="muted" style="margin:2px 0 8px">어린이 테마를 쓰는 동안 아래 색 설정은 적용되지 않아요</div>':''}<div class="lbl2">테마 색 (버튼·선택·강조)</div><div class="rowsw">${PALETTE.map(p=>`<span class="sw ${c===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setColor" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${c}" data-live="liveColor" data-chg="pickColor" title="직접 고르기"></div>
+  return `<div class="themeBox"><div class="lbl2" style="margin-top:0">어린이 테마 <span class="muted">(이 기기에만 적용)</span></div><div class="chips">${KT.map(k=>`<span class="chip ${(UI.kt||'')===k[0]?'on':''}" data-a="setKT" data-id="${k[0]}">${k[2]} ${k[1]}</span>`).join('')}</div>${UI.kt?'<div class="muted" style="margin:2px 0 8px">어린이 테마를 쓰는 동안 아래 색 설정은 적용되지 않아요</div>':''}<div class="lbl2">글꼴 <span class="muted">(이 기기에만 적용)</span></div><select data-chg="setFontSel" style="max-width:100%">${FONTS.map(f=>`<option value="${f[0]}" ${(UI.font||'')===f[0]?'selected':''}>${f[1]}</option>`).join('')}</select><div class="lbl2">테마 색 (버튼·선택·강조)</div><div class="rowsw">${PALETTE.map(p=>`<span class="sw ${c===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setColor" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${c}" data-live="liveColor" data-chg="pickColor" title="직접 고르기"></div>
   <div class="lbl2">배경색</div><div class="rowsw"><span class="sw def ${bg?'':'on'}" data-a="setBg" data-id="" title="기본">기본</span>${BGS.map(p=>`<span class="sw ${bg===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setBg" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${bg||'#f6f7f9'}" data-live="liveBg" data-chg="pickBg" title="직접 고르기"></div>
   <div class="muted" style="margin:4px 0 8px">배경색을 고르면 밝기에 맞춰 글자색이 자동으로 바뀌어요</div>
   <div class="lbl2">화면 모드 (배경색이 기본일 때)</div><div class="chips">${MODES.map(m=>`<span class="chip ${(UI.mode||'auto')===m[0]?'on':''}" data-a="setMode" data-id="${m[0]}">${m[1]}</span>`).join('')}</div><div class="muted">이 기기에만 적용돼요</div></div>`}
@@ -590,6 +634,7 @@ const lum=h=>{const n=parseInt(h.slice(1),16);return (0.299*(n>>16&255)+0.587*(n
 function applyTheme(){
   const r=document.documentElement,st=r.style,mode=UI.mode||'auto';
   const kt=KT.some(k=>k[0]===UI.kt)?UI.kt:'';
+  applyFont();
   if(kt){r.dataset.kt=kt;r.dataset.tone='light';['--accent','--bg','--card','--card2','--line','--bd'].forEach(k=>st.removeProperty(k));return}
   delete r.dataset.kt;
   let dark=mode==='dark'||(mode==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
@@ -874,6 +919,7 @@ const A={
  themeOpen(){openModal(`<h2>테마</h2>${themeBox()}<div class="row" style="margin-top:12px"><button class="btn pri" style="flex:1" data-a="close">완료</button></div>`)},
  setColor(d){UI.color=d.id;saveUI();themeChanged()},
  saveTitle(){const v=val('pgTitle').trim().slice(0,30);setSettings({title:v});document.title=v||'우리집 대시보드';toast(v?'홈 타이틀을 저장했어요':'홈 타이틀을 지웠어요')},
+ setFontSel(d,el){UI.font=el.value;saveUI();themeChanged()},
  setKT(d){UI.kt=d.id;saveUI();themeChanged()},
  setBg(d){UI.bg=d.id;saveUI();themeChanged()},
  setMode(d){UI.mode=d.id;saveUI();themeChanged()},
