@@ -377,6 +377,7 @@ input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{
 .msg.me .bmeta{justify-content:flex-end}
 .rdc,.rdi,.rxb{cursor:pointer}.rdi{display:inline-flex;gap:2px;align-items:center}.rdi .av{border:1px solid var(--card)}
 .fh .fc em.mn,.mn{font-style:normal;opacity:.65;font-size:.85em;margin-left:3px}
+.hC .fc2 i.tr{font-style:normal;white-space:nowrap;display:block;letter-spacing:-.4px}.hC .fc2 i.tr b{font-size:12.5px}.hC .fc2 i.tr em{display:inline;font-size:11px;margin-left:2px}
 .bdg{position:absolute;top:-5px;right:-9px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center;box-sizing:border-box}
 nav#nav .i{position:relative}
 .rxb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.rxb{color:var(--muted);width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--line);font-size:13px;line-height:1;background:var(--card)}
@@ -778,7 +779,7 @@ function heroHTML(){
     const rain=(dd.precipitation_probability_max[0]||0)>=50,cold=dd.temperature_2m_max[0]<6,hot=dd.temperature_2m_max[0]>=30;
     info=`${esc((D.settings.wx||{}).name||'')} · 최저 ${Math.round(dd.temperature_2m_min[0])}° · 최고 ${Math.round(dd.temperature_2m_max[0])}°${rain?' · ☂️ 우산!':cold?' · 🧣 따뜻하게!':hot?' · 💧 물 챙기기':''}`;
     src=WX.src==='kma-om'?'기상청 모델':'Open-Meteo';
-    fc=dd.time.slice(1,6).map((t,i)=>`<div><span>${DOW[pd(t).getDay()]}</span>${WMO(dd.weather_code[i+1])[0]}<b>${Math.round(dd.temperature_2m_max[i+1])}°</b><em class="mn">${Math.round(dd.temperature_2m_min[i+1])}°</em></div>`).join('')}
+    fc=dd.time.slice(1,6).map((t,i)=>`<div><span>${DOW[pd(t).getDay()]}</span>${WMO(dd.weather_code[i+1])[0]}<i class="tr"><b>${Math.round(dd.temperature_2m_max[i+1])}°</b><em class="mn">${Math.round(dd.temperature_2m_min[i+1])}°</em></i></div>`).join('')}
   return `<div class="card hero whead fh">${famHTML()}
    <div class="hA"><div class="hd1"><div class="date">${dt}</div><div class="hi">${greet()}</div></div><i class="vsep"></i>
     ${WX?`<div class="hw"><span class="ic">${ic}</span><b>${temp}</b><div><div class="sub2" title="${esc(wxSrc())}">${info}</div><div class="sub3">${src}</div></div></div>`:`<div class="hw muted">날씨 불러오는 중…</div>`}</div>
