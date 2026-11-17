@@ -95,8 +95,8 @@ label.l{font-size:12px;color:var(--sub);display:block}
 /* health */
 .vrow{padding:8px 0;border-top:1px solid var(--line)}
 .vrow:first-of-type{border-top:0}
-.dose{display:inline-flex;flex-direction:column;align-items:center;margin:3px 4px 3px 0;padding:3px 9px;border-radius:10px;font-size:12px;border:1px solid var(--line);cursor:pointer;background:var(--card);min-width:56px;line-height:1.3}
-.dose small{font-size:10px;color:var(--sub)}
+.dose{display:inline-flex;flex-direction:column;align-items:center;margin:3px 4px 3px 0;padding:3px 9px;border-radius:10px;font-size:12px;border:1px solid var(--line);cursor:pointer;background:var(--card);width:150px;text-align:center;line-height:1.3}
+.dose small{font-size:10px;color:var(--sub);white-space:nowrap}
 .dose.done{background:color-mix(in srgb,var(--ok) 16%,var(--card));border-color:var(--ok)}
 .dose.due{background:var(--accent2);border-color:var(--accent)}
 .dose.over{background:color-mix(in srgb,var(--danger) 14%,var(--card));border-color:var(--danger)}
@@ -240,6 +240,52 @@ nav#nav button.on .i svg .f{fill-opacity:.35}
 .hC .fc2 div{text-align:center;font-size:13px;background:var(--card2);border-radius:10px;padding:5px 2px;display:flex;flex-direction:column;gap:1px}
 .hC .fc2 span{font-size:11px;color:var(--sub)}.hC .fc2 b{font-weight:600}
 }
+
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(min-width:900px){.mgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.mgrid .meal{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:0}
+.mgrid .meal.today{background:var(--accent2);border-color:var(--accent);margin:0;padding:8px 10px}
+.mgrid .meal b{padding-bottom:4px;margin-bottom:4px;border-bottom:1px dashed var(--line)}
+.dish{font-size:13px;line-height:1.45}
+#chatpage .chat{margin-bottom:18px}
+/* ===== 어린이 테마 ===== */
+:root[data-kt=princess]{--bg:#fff1f7;--card:#ffffff;--card2:#ffe6f1;--text:#5b2a45;--sub:#a0708a;--line:#f7c6dc;--bd:#f7c6dc;--accent:#e0559a;--shadow:0 4px 14px rgba(224,85,154,.18)}
+html[data-kt=princess]{background:#fff1f7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='%23f7b6d2'%3E%3Cpath d='M20 14l2 6 6 2-6 2-2 6-2-6-6-2 6-2z'/%3E%3Cpath d='M86 70l1.6 4.4 4.4 1.6-4.4 1.6L86 82l-1.6-4.4L80 76l4.4-1.6z' fill='%23f5c451'/%3E%3Ccircle cx='70' cy='20' r='2'/%3E%3Ccircle cx='28' cy='88' r='2.4' fill='%23f5c451'/%3E%3C/g%3E%3C/svg%3E")}
+html[data-kt=princess] body{background:transparent}
+html[data-kt=princess] .card{border:2px solid var(--line);border-radius:22px}
+html[data-kt=princess] .hero{background:linear-gradient(135deg,#fff,#ffe3f0);border-color:#f5c451}
+html[data-kt=princess] .btn,html[data-kt=princess] .chip{border-radius:99px}
+html[data-kt=princess] .btn.pri{background:linear-gradient(135deg,#f472b6,#e0559a);border-color:#e0559a;color:#fff}
+html[data-kt=princess] .top h1::before,html[data-kt=princess] .hero .date::after{content:'👑 '}
+html[data-kt=princess] .hero .date::after{content:' 👑'}
+:root[data-kt=unicorn]{--bg:#f3f0ff;--card:rgba(255,255,255,.84);--card2:rgba(238,232,255,.85);--text:#3b2f63;--sub:#7d6fa6;--line:#dccfff;--bd:#dccfff;--accent:#8b5cf6;--shadow:0 6px 18px rgba(139,92,246,.16)}
+html[data-kt=unicorn]{background:radial-gradient(60% 40% at 15% 0%,rgba(110,245,205,.55),transparent 70%),radial-gradient(55% 45% at 90% 8%,rgba(170,130,255,.5),transparent 70%),radial-gradient(60% 50% at 70% 100%,rgba(255,140,200,.42),transparent 70%),radial-gradient(50% 40% at 0% 90%,rgba(130,200,255,.45),transparent 70%),#f4efff;background-attachment:fixed}
+html[data-kt=unicorn] body{background:transparent}
+html[data-kt=unicorn] .card{border:1.5px solid rgba(255,255,255,.9);border-radius:22px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+html[data-kt=unicorn] .hero{position:relative;overflow:hidden}
+html[data-kt=unicorn] .hero::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,#ff8fb8,#ffd36e,#7be0b0,#7ab8ff,#b48cff)}
+html[data-kt=unicorn] .btn,html[data-kt=unicorn] .chip{border-radius:99px}
+html[data-kt=unicorn] .btn.pri{background:linear-gradient(135deg,#a78bfa,#f472b6);border-color:transparent;color:#fff}
+html[data-kt=unicorn] .top h1::before{content:'🦄 '}
+html[data-kt=unicorn] .hero .date::after{content:' 🦄'}
+:root[data-kt=pixel]{--bg:#fdf3d6;--card:#fffdf2;--card2:#ffe9a8;--text:#1f1a3a;--sub:#5c5683;--line:#1f1a3a;--bd:#1f1a3a;--accent:#e63b5c;--shadow:4px 4px 0 #1f1a3a}
+html[data-kt=pixel]{background:#fdf3d6 linear-gradient(rgba(31,26,58,.07) 1px,transparent 1px) 0 0/16px 16px,linear-gradient(90deg,rgba(31,26,58,.07) 1px,transparent 1px) 0 0/16px 16px}
+html[data-kt=pixel] body{background:transparent;font-family:ui-monospace,"Courier New","Malgun Gothic","Apple SD Gothic Neo",monospace;-webkit-font-smoothing:none}
+html[data-kt=pixel] *:not(.edot){border-radius:0!important}
+html[data-kt=pixel] .card{border:3px solid var(--line)}
+html[data-kt=pixel] .btn,html[data-kt=pixel] .chip,html[data-kt=pixel] input,html[data-kt=pixel] select,html[data-kt=pixel] textarea{border:2px solid var(--line)}
+html[data-kt=pixel] .btn.pri{background:var(--accent);color:#fff;box-shadow:2px 2px 0 var(--line)}
+html[data-kt=pixel] .chip.on{box-shadow:2px 2px 0 var(--line)}
+html[data-kt=pixel] .top h1::before{content:'👾 '}
+html[data-kt=pixel] .hero .date::after{content:' 👾'}
+html[data-kt=pixel] .cal,html[data-kt=pixel] .cal .d{border-color:var(--line)}
+#chatpage{display:flex;flex-direction:column;height:calc(100dvh - 150px - env(safe-area-inset-bottom));min-height:360px;margin-bottom:0}
+@media(min-width:900px){#chatpage{height:calc(100dvh - 100px)}}
+#chatpage .chat{flex:1 1 auto;min-height:0;overflow-y:auto;margin-bottom:12px}
+#chatpage .chatcal{flex:0 1 auto;max-height:52%;overflow-y:auto}
+#chatpage .compose{position:static;flex:0 0 auto;margin-top:0;box-shadow:none}
+.ptitle{font-size:24px;font-weight:800;line-height:1.2;padding:2px 4px 10px;letter-spacing:-.3px;word-break:keep-all}
+@media(min-width:1000px){.wide.hast{height:calc(100dvh - 26px - 44px)}}
 </style>
 </head>
 <body>
@@ -451,7 +497,7 @@ async function mealHTML(sch,off,onlyToday){
   const td=compact(new Date());
   if(onlyToday){const r=rows.find(x=>x.d===td);return r?dishes(r.dish).map(x=>esc(x.n)).join(' · '):'<span class="muted">오늘은 급식 정보가 없어요</span>'}
   if(!rows.length)return '<div class="empty">이 주에는 급식 정보가 없어요</div>';
-  return rows.map(r=>{const d=pd(r.d.slice(0,4)+'-'+r.d.slice(4,6)+'-'+r.d.slice(6));return `<div class="meal ${r.d===td?'today':''}"><b>${fmtK(ymd(d))}${r.cal?` <span class="muted">${esc(r.cal)}</span>`:''}</b>${dishes(r.dish).map(x=>esc(x.n)+(x.a?`<span class="a"> ${esc(x.a)}</span>`:'')).join(' · ')}</div>`}).join('')}
+  return '<div class="mgrid">'+rows.map(r=>{const d=pd(r.d.slice(0,4)+'-'+r.d.slice(4,6)+'-'+r.d.slice(6));return `<div class="meal ${r.d===td?'today':''}"><b>${fmtK(ymd(d))}${r.cal?` <span class="muted">${esc(r.cal)}</span>`:''}</b>${dishes(r.dish).map(x=>`<div class="dish">${esc(x.n)}${x.a?`<span class="a"> ${esc(x.a)}</span>`:''}</div>`).join('')}</div>`}).join('')+'</div>'}
 async function fillMeals(){
   for(const el of document.querySelectorAll('[data-meal]')){
     const sch=JSON.parse(el.dataset.meal);const off=+el.dataset.off||0;
@@ -516,8 +562,9 @@ let UNLOCK=false;
 let chatStick=false;
 function render(){
   if(modalOpen())return;
-  applyTheme();
+  applyTheme();document.title=(D.settings.title||'').trim()||'우리집 대시보드';
   const ins=[...document.querySelectorAll('[data-enter]')],vals=ins.map(i=>i.value),act=ins.indexOf(document.activeElement);
+  const oc=document.querySelector('#chatpage .chat'),ocB=!oc||oc.scrollHeight-oc.scrollTop-oc.clientHeight<40,ocT=oc?oc.scrollTop:0;
   renderNav();const st=window.scrollY;const cs=[...document.querySelectorAll('.wide .col')].map(c=>c.scrollTop);
   const V={home:vHome,cal:vCal,todo:vTodo,chat:vChat,tt:vTT,meal:vMeal,health:vHealth,set:vSet}[UI.tab]||vHome;
   $('#main').innerHTML=V();updateBadge();fillMeals();centerNow();LASTSIG=nowSig();
@@ -525,21 +572,26 @@ function render(){
   if(ins2.length===ins.length){ins2.forEach((e,i)=>{if(vals[i])e.value=vals[i]});if(act>=0&&ins2[act])ins2[act].focus()}
   window.scrollTo(0,st);document.querySelectorAll('.wide .col').forEach((c,i)=>{c.scrollTop=cs[i]||0});
   document.querySelectorAll('.chatbox').forEach(b=>b.scrollTop=b.scrollHeight);
-  if(chatStick){chatStick=false;window.scrollTo(0,document.body.scrollHeight)}}
+  const nc=document.querySelector('#chatpage .chat');if(nc){nc.scrollTop=(ocB||chatStick||!oc)?nc.scrollHeight:ocT;if(chatStick)window.scrollTo(0,0)}
+  chatStick=false}
 function meSel(){return ME&&mem(ME)?ME:null}
 
 /* --- 홈 (와이드 보드) --- */
 const PALETTE=[['#2f6bff','파랑'],['#6c5ce7','보라'],['#e5489b','분홍'],['#e5484d','빨강'],['#ff7a59','주황'],['#e0a100','노랑'],['#1f9d55','초록'],['#0ea5a5','청록'],['#3b4252','회색']];
 const BGS=[['#ffffff','흰색'],['#f3efe6','베이지'],['#eaf2ff','하늘'],['#fdeef4','분홍'],['#eaf6ee','연두'],['#f1edfb','라벤더'],['#101418','블랙'],['#13203a','네이비'],['#12302a','숲'],['#2b1a26','와인']];
 const MODES=[['auto','자동'],['light','라이트'],['dark','다크']];
+const KT=[['','없음',''],['princess','공주풍','👑'],['unicorn','유니콘·오로라','🦄'],['pixel','픽셀아트','👾']];
 function themeBox(){const c=(UI.color||'#2f6bff').toLowerCase(),bg=(UI.bg||'').toLowerCase();
-  return `<div class="themeBox"><div class="lbl2" style="margin-top:0">테마 색 (버튼·선택·강조)</div><div class="rowsw">${PALETTE.map(p=>`<span class="sw ${c===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setColor" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${c}" data-live="liveColor" data-chg="pickColor" title="직접 고르기"></div>
+  return `<div class="themeBox"><div class="lbl2" style="margin-top:0">어린이 테마 <span class="muted">(이 기기에만 적용)</span></div><div class="chips">${KT.map(k=>`<span class="chip ${(UI.kt||'')===k[0]?'on':''}" data-a="setKT" data-id="${k[0]}">${k[2]} ${k[1]}</span>`).join('')}</div>${UI.kt?'<div class="muted" style="margin:2px 0 8px">어린이 테마를 쓰는 동안 아래 색 설정은 적용되지 않아요</div>':''}<div class="lbl2">테마 색 (버튼·선택·강조)</div><div class="rowsw">${PALETTE.map(p=>`<span class="sw ${c===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setColor" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${c}" data-live="liveColor" data-chg="pickColor" title="직접 고르기"></div>
   <div class="lbl2">배경색</div><div class="rowsw"><span class="sw def ${bg?'':'on'}" data-a="setBg" data-id="" title="기본">기본</span>${BGS.map(p=>`<span class="sw ${bg===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setBg" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${bg||'#f6f7f9'}" data-live="liveBg" data-chg="pickBg" title="직접 고르기"></div>
   <div class="muted" style="margin:4px 0 8px">배경색을 고르면 밝기에 맞춰 글자색이 자동으로 바뀌어요</div>
   <div class="lbl2">화면 모드 (배경색이 기본일 때)</div><div class="chips">${MODES.map(m=>`<span class="chip ${(UI.mode||'auto')===m[0]?'on':''}" data-a="setMode" data-id="${m[0]}">${m[1]}</span>`).join('')}</div><div class="muted">이 기기에만 적용돼요</div></div>`}
 const lum=h=>{const n=parseInt(h.slice(1),16);return (0.299*(n>>16&255)+0.587*(n>>8&255)+0.114*(n&255))/255};
 function applyTheme(){
   const r=document.documentElement,st=r.style,mode=UI.mode||'auto';
+  const kt=KT.some(k=>k[0]===UI.kt)?UI.kt:'';
+  if(kt){r.dataset.kt=kt;r.dataset.tone='light';['--accent','--bg','--card','--card2','--line','--bd'].forEach(k=>st.removeProperty(k));return}
+  delete r.dataset.kt;
   let dark=mode==='dark'||(mode==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
   const bg=/^#[0-9a-f]{6}$/i.test(UI.bg||'')?UI.bg:'';
   if(bg)dark=lum(bg)<.45;
@@ -591,7 +643,8 @@ function vHome(){
   const soon=kids().flatMap(dueSoon).slice(0,4);const sch=schools();
   const[y,m]=UI.month.split('-').map(Number);const sel=UI.sel;const selEv=eventsOn(sel);
   const cw=(UI.colW&&UI.colW.length===3?UI.colW:[1.18,1,1.05]);
-  return `<div class="wide" style="--c1:${cw[0]}fr;--c2:${cw[1]}fr;--c3:${cw[2]}fr">${heroHTML()}
+  const pt=(D.settings.title||'').trim();
+  return `${pt?`<div class="ptitle">${esc(pt)}</div>`:''}<div class="wide ${pt?'hast':''}" style="--c1:${cw[0]}fr;--c2:${cw[1]}fr;--c3:${cw[2]}fr">${heroHTML()}
   <div class="col">
    <div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(UI.calF,'calF',true,true):''}<div class="cal hcal">${calCells(y,m,UI.calF,t,sel)}</div></div>
    <div class="card"><h2>${sel===t?'오늘':fmtK(sel)} 일정 <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 추가</button></h2>${selEv.length?selEv.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요 🎈</div>'}</div>
@@ -771,6 +824,7 @@ function vSet(){
   const g=gh()||{},ms=members();
   return head('설정')+`<div class="grid g2"><div>
   <div class="card"><h2>👨‍👩‍👧 가족 <span class="sp"></span><button class="btn sm pri" data-a="addMem">+ 추가</button></h2>${ms.map(m=>`<div class="ev" data-a="editMem" data-id="${m.id}" style="cursor:pointer"><div class="bar" style="background:${esc(m.color)}"></div><div><div class="t">${esc(m.emoji||'')} ${esc(m.name)} <span class="muted">${m.role==='child'?'아이':'어른'}${m.role==='child'&&m.birth?' · '+ageTxt(m.birth):''}</span></div><div class="muted">${m.role==='child'&&m.school&&m.school.name?'🏫 '+esc(m.school.name):''}</div></div></div>`).join('')||'<div class="empty">가족을 추가하세요</div>'}</div>
+  <div class="card"><h2>🏷️ 홈 타이틀</h2><div class="muted" style="margin-bottom:6px">홈 화면 맨 위에 걸리는 제목이에요. 비우면 표시하지 않아요. 가족 모두에게 같이 보여요.</div><div class="row"><input type="text" id="pgTitle" maxlength="30" value="${esc(D.settings.title||'')}" placeholder="예: 김씨네 우리집" style="flex:1;margin:0" data-enter="saveTitle"><button class="btn pri" data-a="saveTitle">저장</button></div></div>
   <div class="card"><h2>🎨 테마</h2>${themeBox()}</div>
   <div class="card"><h2>🙋 나는 누구?</h2><div class="muted">이 기기에서 홈 화면에 내 할 일만 보여줘요.</div>${memChips(ME?[ME]:[],'setMe',false,false)}</div>
   </div><div>
@@ -819,6 +873,8 @@ const A={
  quickAdd(d,el){const v=el.value.trim();if(!v)return;upsert('todos',{id:uid(),text:v,member:d.m,done:false})},
  themeOpen(){openModal(`<h2>테마</h2>${themeBox()}<div class="row" style="margin-top:12px"><button class="btn pri" style="flex:1" data-a="close">완료</button></div>`)},
  setColor(d){UI.color=d.id;saveUI();themeChanged()},
+ saveTitle(){const v=val('pgTitle').trim().slice(0,30);setSettings({title:v});document.title=v||'우리집 대시보드';toast(v?'홈 타이틀을 저장했어요':'홈 타이틀을 지웠어요')},
+ setKT(d){UI.kt=d.id;saveUI();themeChanged()},
  setBg(d){UI.bg=d.id;saveUI();themeChanged()},
  setMode(d){UI.mode=d.id;saveUI();themeChanged()},
  liveColor(d,el){UI.color=el.value;applyTheme()},
@@ -831,7 +887,7 @@ const A={
  clearDone(d){D.todos.filter(t=>t.member===d.id&&!t.del&&todoDone(t)&&t.repeat!=='daily').forEach(t=>{t.del=true;t.u=Date.now()});changed()},
  chatCalToggle(){UI.chatCal=!UI.chatCal;UI.chatMonth=chatDayOf().slice(0,7);saveUI();render()},
  chatMon(d){const[y,m]=(UI.chatMonth||chatDayOf().slice(0,7)).split('-').map(Number);const n=new Date(y,m-1+(+d.id),1);UI.chatMonth=n.getFullYear()+'-'+pad(n.getMonth()+1);saveUI();render()},
- chatPick(d){UI.chatDay=d.id===TODAY()?'':d.id;saveUI();render()},
+ chatPick(d){UI.chatDay=d.id===TODAY()?'':d.id;saveUI();chatStick=true;render()},
  chatDayNav(d){const n=ymd(addD(pd(chatDayOf()),+d.id));if(n>TODAY())return;UI.chatDay=n===TODAY()?'':n;UI.chatMonth=n.slice(0,7);saveUI();render()},
  chatToday(){UI.chatDay='';UI.chatMonth='';saveUI();chatStick=true;render()},
  chatSend(){const el=$('#chatIn');if(!el)return;const v=el.value.trim();if(!v)return;const who=val('chatWho')||chatWho();if(!who){toast('먼저 가족을 추가하세요');return}
