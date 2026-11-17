@@ -354,6 +354,7 @@ input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{
 .tgb .gm{position:absolute;left:0;right:0;height:2px;background:var(--card);pointer-events:none}
 .tgb{position:relative;background-image:linear-gradient(color-mix(in srgb,var(--line) 45%,var(--card)) 1px,transparent 1px);background-size:100% 48px;border-top:1px solid color-mix(in srgb,var(--line) 45%,var(--card))}
 .tgb .sev{position:absolute;margin:0;padding:3px 6px;overflow:hidden;box-sizing:border-box;font-size:12.5px;line-height:1.3}
+.tgb .sev.sh{display:flex;align-items:center;gap:4px;padding:0 6px;white-space:nowrap}.tgb .sev.sh .pl{display:none}.tgb .sev.sh .tm{flex:none}.tgb .sev.sh .ti{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .tgb .sev .tm{font-size:10.5px}.tgb .sev .pl{font-size:10.5px}
 @media(max-width:700px){.sg.tg{display:flex;gap:0 6px}.tgl{width:40px;flex:none}.tgl .sp{display:none}.sg.tg .sgc.sel{flex:1;min-width:0}.sgc h3{display:none}}
 
@@ -925,10 +926,10 @@ const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinute
 const ttNarrow=()=>window.matchMedia&&matchMedia('(max-width:700px)').matches;
 const ttMin=x=>{const[a,b]=(x||'0:0').split(':').map(Number);return a*60+(b||0)};
 function ttBlocks(cid,d,H0,HH,hm,today){
-  const it=kidSched(cid,d).map(e=>({e,s:ttMin(e.start),f:Math.max(ttMin(e.end)||ttMin(e.start)+50,ttMin(e.start)+45),l:0,n:1}));
+  const it=kidSched(cid,d).map(e=>({e,s:ttMin(e.start),f:Math.max(ttMin(e.end)||ttMin(e.start)+50,ttMin(e.start)+40),l:0,n:1}));
   it.forEach((a,x)=>{const used=new Set();it.forEach((b,y)=>{if(y<x&&b.s<a.f&&a.s<b.f)used.add(b.l)});let l=0;while(used.has(l))l++;a.l=l});
   it.forEach(a=>{let n=a.l+1;it.forEach(b=>{if(b.s<a.f&&a.s<b.f)n=Math.max(n,b.l+1)});a.n=n});
-  return it.map(({e,s:st,f,l,n})=>`${st%60===0?`<i class="gm" style="top:${(st-H0*60)/60*HH-1}px"></i>`:''}<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)"${isKidMe()?'':` data-a="editSched" data-id="${e.id}"`}><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')}
+  return it.map(({e,s:st,f,l,n})=>`${st%60===0?`<i class="gm" style="top:${(st-H0*60)/60*HH-1}px"></i>`:''}${f%60===0?`<i class="gm" style="top:${(f-H0*60)/60*HH-1}px"></i>`:''}<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${(f-st)/60*HH<44?'sh':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)"${isKidMe()?'':` data-a="editSched" data-id="${e.id}"`}><div class="tm">${esc(e.start||'')}${e.end?((f-st)/60*HH<44?'~':' ~ ')+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')}
 function ttAxis(H0,H1,HH){return `<div class="tgl"><div class="sp"></div><div class="tgx" style="height:${(H1-H0)*HH}px">${Array.from({length:H1-H0},(_,k)=>`<div class="hl" style="top:${k*HH}px">${String(H0+k).padStart(2,'0')}:00</div>`).join('')}</div></div>`}
 function vTT(){
   const ks=kids();if(!ks.length)return head('시간표')+'<div class="empty">시간표는 "아이"로 등록한 가족만 사용해요.<br>설정에서 구분을 "아이"로 지정해 주세요</div>';
