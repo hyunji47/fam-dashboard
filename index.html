@@ -791,7 +791,8 @@ function vHome(){
   return `<div class="ptop">${pt?`<div class="ptitle">${esc(pt)}</div>`:'<span></span>'}<div class="tbtns"><button class="rfbtn" data-a="homeRefresh" title="새로고침" aria-label="새로고침">↻</button><button class="rfbtn" data-a="tab" data-id="set" title="설정" aria-label="설정">${I_set}</button></div></div><div class="wide ${pt?'hast':''}" style="--c1:${cw[0]}fr;--c2:${cw[1]}fr;--c3:${cw[2]}fr">${heroHTML()}
   <div class="col">
    <div class="card"><h2>${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(UI.calF,'calF',true,true):''}<div class="cal hcal">${calCells(y,m,UI.calF,t,sel)}</div></div>
-   <div class="card"><h2><span class="hseg"><span class="chip ${UI.homeT!=='week'?'on':''}" data-a="homeT" data-id="today">${sel===t?'오늘':fmtK(sel)}</span><span class="chip ${UI.homeT==='week'?'on':''}" data-a="homeT" data-id="week">7일간</span></span><span class="sp"></span>${!isKidMe()?`<button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 추가</button>`:''}</h2>${UI.homeT==='week'?(up.length?up.slice(0,8).map(e=>evRow(e,true)).join(''):'<div class="empty">예정된 일정이 없어요</div>'):(selEv.length?selEv.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요 🎈</div>')}</div>
+   <div class="card"><h2>${sel===t?'오늘':fmtK(sel)} 일정 <span class="sp"></span>${!isKidMe()?`<button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 추가</button>`:''}</h2>${selEv.length?selEv.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요 🎈</div>'}</div>
+   <div class="card"><h2>D-day</h2>${ddayHTML()}</div>
   </div>
   <div class="rz" data-rz="0" title="드래그해서 넓이 조절 · 더블클릭하면 원래대로"></div>
   <div class="col">
@@ -830,6 +831,9 @@ function vCal(){
   return head('달력',`<button class="btn sm" data-a="calView" data-id="${list?'month':'list'}">${list?'달력':'목록'}</button>`)+
   (list&&members().length?memChips(f,'calF',true,true):'')+body+(list&&!isKidMe()?`<button class="fab" data-a="addEv" data-date="${sel}">+</button>`:'')}
 
+function ddayList(){const t=TODAY();return D.events.filter(e=>!e.del&&e.dday&&(e.end||e.date)>=t).map(e=>({e,n:Math.round((new Date((e.date>=t?e.date:t)+'T00:00')-new Date(t+'T00:00'))/864e5)})).sort((a,b)=>a.n-b.n||a.e.title.localeCompare(b.e.title))}
+function ddayHTML(){const L=ddayList();if(!L.length)return '<div class="empty">D-day로 표시할 일정이 없어요<div class="muted">일정을 추가할 때 D-day에 넣을 수 있어요</div></div>';
+  return L.map(({e,n})=>`<div class="ev" ${isKidMe()?'':`data-a="editEv" data-id="${e.id}"`} style="${isKidMe()?'':'cursor:pointer'}"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${esc(e.title)}</div><div class="muted">${fmtK(e.date)}</div></div><b style="font-size:18px;color:${n===0?'var(--accent)':'inherit'}">${n===0?'D-Day':'D-'+n}</b></div>`).join('')}
 function evForm(e){
   e=e||{};const sel=e.members||[];
   openModal(`<h2>${e.id?'일정 수정':'일정 추가'}</h2>
@@ -838,6 +842,7 @@ function evForm(e){
   <label class="l">시간(선택)</label><input type="time" id="f_time" value="${esc(e.time||'')}">
   <label class="l">대상 (선택 안 하면 온 가족)</label><div class="chips" id="f_mem">${members().map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="togChip" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div>
   <label class="l">일정 색</label><div class="chips" id="f_ecol"><span class="chip ${!e.color?'on':''}" data-a="pickEvCol" data-id="">자동</span>${COLORS.map(c=>`<span class="chip ${e.color===c?'on':''}" data-a="pickEvCol" data-id="${c}" style="padding:4px 8px;opacity:1"><span class="dot" style="background:${c};width:16px;height:16px"></span></span>`).join('')}</div>
+  <label class="l">D-day</label><div class="chips"><span class="chip ${e.dday?'on':''}" id="f_dd" data-a="togChip">D-day에 표시</span></div>
   <label class="l">메모</label><input type="text" id="f_memo" value="${esc(e.memo||'')}">
   <div class="row"><button class="btn pri" style="flex:1" data-a="saveEv" data-id="${e.id||''}">저장</button>${e.id?`<button class="btn danger" data-a="delEv" data-id="${e.id}">삭제</button>`:''}<button class="btn" data-a="close">닫기</button></div>`)}
 
@@ -1048,7 +1053,7 @@ const A={
  saveEv(d){if(isKidMe())return;const title=val('f_title').trim();if(!title){toast('제목을 입력하세요');return}
    const date=val('f_date')||TODAY();let end=val('f_end');if(end&&end<=date)end='';
    const mems=[...document.querySelectorAll('#f_mem .chip.on')].map(c=>c.dataset.id);
-   const o={id:d.id||uid(),title,date,end,time:val('f_time'),memo:val('f_memo').trim(),members:mems,color:((document.querySelector('#f_ecol .chip.on')||{dataset:{}}).dataset.id||'')};
+   const o={id:d.id||uid(),title,date,end,time:val('f_time'),memo:val('f_memo').trim(),members:mems,dday:$('#f_dd').classList.contains('on'),color:((document.querySelector('#f_ecol .chip.on')||{dataset:{}}).dataset.id||'')};
    $('#modal').classList.remove('on');upsert('events',o);$('#box').innerHTML=''},
  delEv(d){if(isKidMe())return;if(!confirm('삭제할까요?'))return;$('#modal').classList.remove('on');removeItem('events',d.id)},
  goSetMe(){$('#modal').classList.remove('on');$('#box').innerHTML='';UI.tab='set';saveUI();render()},
