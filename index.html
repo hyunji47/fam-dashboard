@@ -308,6 +308,18 @@ html[data-kt=pixel] .hero .date::after{content:' 🎮'}
 html[data-font] body,html[data-font] button,html[data-font] input,html[data-font] select,html[data-font] textarea{font-family:var(--ff)}
 html[data-font]{font-synthesis:none}
 html[data-fw] *{font-weight:400!important}
+
+/* 가족 픽셀 캐릭터 */
+.wide .whead.fh,.whead.fh{position:relative;margin-top:36px;padding-top:20px}
+.fam{position:absolute;right:22px;top:-27px;pointer-events:none;z-index:2}
+.fam .lg{transform-box:fill-box;transform-origin:50% 0;animation:lgs 1.2s steps(6) infinite}
+.fam .lg.l2{animation-direction:reverse}
+.fam .fp{animation:fbob 2.4s steps(2,jump-none) infinite}
+.fam .fp-g1{animation-duration:1.9s}.fam .fp-g2{animation-duration:2.9s}
+@keyframes lgs{0%,100%{transform:rotate(16deg)}50%{transform:rotate(-16deg)}}
+@keyframes fbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@media(prefers-reduced-motion:reduce){.fam .lg,.fam .fp{animation:none}}
+html[data-kt=unicorn] .hero.fh{overflow:visible}html[data-kt=unicorn] .hero.fh::before{border-radius:22px 22px 0 0}
 </style>
 </head>
 <body>
@@ -666,6 +678,24 @@ function mealToday(){
   const cur=sch.find(x=>x.code===UI.mealTab)||sch[0];
   return `<div class="card"><h2>🍱 오늘 급식</h2>${sch.length>1?`<div class="chips">${sch.map(x=>`<span class="chip ${x.code===cur.code?'on':''}" data-a="mealTab" data-id="${esc(x.code)}">${esc(x.name)}</span>`).join('')}</div>`:''}<div class="muted" style="margin-bottom:6px">🏫 ${esc(cur.name)} · ${esc(cur.who)}</div><div class="lunch" style="background:var(--card2);border-radius:10px;padding:8px 10px;font-size:15px"><span data-meal='${esc(JSON.stringify({office:cur.office,code:cur.code,name:cur.name}))}' data-off="0" data-today="1">불러오는 중…</span></div></div>`}
 function greet(){const h=new Date().getHours();return h<6?'새벽이에요':h<12?'좋은 아침이에요':h<18?'즐거운 오후예요':'편안한 저녁이에요'}
+
+/* 가족 픽셀 캐릭터 (박스 위에 걸터앉아 다리를 흔들어요) */
+const FC={E:'#222',M:'#d2573f',C:'#ff9aa8'};
+const FAMSP=[
+ {k:'dad',pal:{H:'#3b2a20',S:'#f1c9a5',T:'#3a78d8',P:'#2f3b63',B:'#222'},leg:5,rows:['..HHHHH..','.HHHHHHH.','.HSSSSSH.','.SSESESS.','.SSSMSSS.','.TTTTTTT.','STTTTTTTS','STTTTTTTS','STTTTTTTS']},
+ {k:'mom',pal:{H:'#5a2d1f',S:'#f1c9a5',T:'#e0578a',P:'#8e3a5e',B:'#222'},leg:5,rows:['..HHHHH..','.HHHHHHH.','.HSSSSSH.','HHSESESHH','HHCSMSCHH','HHTTTTTHH','SHTTTTTHS','SHTTTTTHS','.HTTTTTH.']},
+ {k:'g1',pal:{H:'#2b1d17',S:'#f1c9a5',T:'#3fae6b',P:'#2f6b4a',B:'#222',R:'#ff6fa5'},leg:3,rows:['RHHHHHHHR','HHSSSSSHH','HHSESESHH','.CSSMSSC.','..TTTTT..','S.TTTTT.S','..TTTTT..']},
+ {k:'g2',pal:{H:'#a0623a',S:'#f1c9a5',T:'#f2b632',P:'#a5762a',B:'#222',R:'#6ab7ff'},leg:3,rows:['.HHHRHHH.','HHSSSSSHH','HHSESESHH','.CSSMSSC.','..TTTTT..','S.TTTTT.S','..TTTTT..']}];
+FAMSP.forEach(f=>Object.assign(f.pal,FC));
+function famHTML(){const U=3,GAP=2;let x=0,out='',maxH=0;
+  const items=FAMSP.map(f=>{const w=f.rows[0].length;const it={f,x,w};x+=w+GAP;return it});const W=(x-GAP)*U;
+  const H0=Math.max(...FAMSP.map(f=>f.rows.length)),LEG=5;const TOTH=(H0+LEG)*U;
+  items.forEach((it,i)=>{const f=it.f,top=(H0-f.rows.length)*U;let g='';
+    f.rows.forEach((r,ry)=>{for(let cx=0;cx<r.length;cx++){const c=r[cx];if(c!=='.')g+=`<rect x="${(it.x+cx)*U}" y="${top+ry*U}" width="${U}" height="${U}" fill="${f.pal[c]}"/>`}});
+    const by=H0*U;const lw=Math.floor(it.w/2)-1;
+    const leg=(lx,cls)=>`<g class="lg ${cls}" style="animation-delay:${(i*0.37).toFixed(2)}s"><rect x="${lx*U}" y="${by}" width="${lw*U}" height="${(f.leg-1)*U}" fill="${f.pal.P}"/><rect x="${lx*U}" y="${by+(f.leg-1)*U}" width="${lw*U}" height="${U}" fill="${f.pal.B}"/></g>`;
+    out+=`<g class="fp fp-${f.k}" style="animation-delay:${(i*0.5).toFixed(2)}s">${g}</g>${leg(it.x+1,'l1')}${leg(it.x+it.w-1-lw,'l2')}`});
+  return `<svg class="fam" viewBox="0 0 ${W} ${TOTH}" width="${W}" height="${TOTH}" shape-rendering="crispEdges" aria-hidden="true">${out}</svg>`}
 function heroHTML(){
   const d=new Date();const dt=`${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[d.getDay()]}요일`,tm=pad(d.getHours())+':'+pad(d.getMinutes());
   let ic='',temp='',info='',fc='',src='';
@@ -674,7 +704,7 @@ function heroHTML(){
     info=`${esc((D.settings.wx||{}).name||'')} · ${Math.round(dd.temperature_2m_min[0])}~${Math.round(dd.temperature_2m_max[0])}°${rain?' · ☂️ 우산!':cold?' · 🧣 따뜻하게!':hot?' · 💧 물 챙기기':''}`;
     src=WX.src==='kma-om'?'기상청 모델':'Open-Meteo';
     fc=dd.time.slice(1,6).map((t,i)=>`<div><span>${DOW[pd(t).getDay()]}</span>${WMO(dd.weather_code[i+1])[0]}<b>${Math.round(dd.temperature_2m_max[i+1])}°</b></div>`).join('')}
-  return `<div class="card hero whead">
+  return `<div class="card hero whead fh">${famHTML()}
    <div class="hA"><div class="hd1"><div class="date">${dt}</div><div class="hi">${greet()}</div></div><i class="vsep"></i>
     ${WX?`<div class="hw"><span class="ic">${ic}</span><b>${temp}</b><div><div class="sub2" title="${esc(wxSrc())}">${info}</div><div class="sub3">${src}</div></div></div>`:`<div class="hw muted">날씨 불러오는 중…</div>`}</div>
    <div class="hC"><div class="c1"><span class="ic">${ic}</span><b>${temp}</b><div class="rt"><div class="dt">${dt}</div><div class="hi">${greet()}</div></div></div>
