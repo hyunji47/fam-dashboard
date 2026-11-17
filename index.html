@@ -564,7 +564,7 @@ const ageTxt=b=>{if(!b)return '';const m=ageM(b);return m<24?m+'개월':Math.flo
 
 /* ============ 화면 ============ */
 const I_home=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M5 11l7-6 7 6v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M3 12l9-8 9 8M10 20v-5h4v5"/></svg>`,I_cal=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="4" y="5" width="16" height="15" rx="3"/><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 3v4M16 3v4M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg>`,I_todo=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="4" y="4" width="16" height="16" rx="4"/><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.2 12.4l2.7 2.7 5-5.6"/></svg>`,I_chat=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg>`,I_tt=`<svg viewBox="0 0 24 24" aria-hidden="true"><circle class="f" cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>`,I_meal=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M4 12h16a8 8 0 0 1-16 0zM9 4.5v3M12 3.5v4M15 4.5v3"/></svg>`,I_health=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`,I_set=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h8M18 7h2M4 12h2M12 12h8M4 17h9M19 17h1"/><circle class="f" cx="15" cy="7" r="2.4"/><circle cx="15" cy="7" r="2.4"/><circle class="f" cx="9" cy="12" r="2.4"/><circle cx="9" cy="12" r="2.4"/><circle class="f" cx="16" cy="17" r="2.4"/><circle cx="16" cy="17" r="2.4"/></svg>`;
-const TABS=[['home',I_home,'홈'],['cal',I_cal,'캘린더'],['todo',I_todo,'할 일'],['chat',I_chat,'가족 대화'],['tt',I_tt,'시간표'],['meal',I_meal,'급식'],['health',I_health,'건강'],['set',I_set,'설정']];
+const TABS=[['home',I_home,'홈'],['cal',I_cal,'달력'],['todo',I_todo,'할 일'],['chat',I_chat,'대화'],['tt',I_tt,'시간표'],['meal',I_meal,'급식'],['health',I_health,'건강'],['set',I_set,'설정']];
 function renderNav(){$('#nav').innerHTML=TABS.map(t=>`<button class="${UI.tab===t[0]?'on':''}" data-a="tab" data-id="${t[0]}"><span class="i">${t[1]}</span>${t[2]}</button>`).join('')}
 function head(title,extra){return `<div class="top"><h1>${title}</h1>${extra||''}<span class="pill" id="badge"></span></div>`}
 /* SHA-256 (동기 구현) */
@@ -729,7 +729,7 @@ function vCal(){
   let body;
   if(list){const days=[];for(let i=0;i<60;i++){const ds=ymd(addD(new Date(),i));const es=eventsOn(ds).filter(pass);if(es.length)days.push(`<div class="card"><h2>${fmtK(ds)}${ds===t?' · 오늘':''}</h2>${es.map(e=>evRow(e)).join('')}</div>`)}body=days.join('')||'<div class="empty">앞으로 60일간 일정이 없어요</div>'}
   else{const es=eventsOn(sel).filter(pass);body=`<div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(f,'calF',true,true):''}<div class="cal hcal">${cells}</div></div><div class="card" style="margin-top:12px"><h2>${fmtK(sel)} <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 일정</button></h2>${es.length?es.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요</div>'}</div>`}
-  return head('캘린더',`<button class="btn sm" data-a="calView" data-id="${list?'month':'list'}">${list?'달력':'목록'}</button>`)+
+  return head('달력',`<button class="btn sm" data-a="calView" data-id="${list?'month':'list'}">${list?'달력':'목록'}</button>`)+
   (list&&members().length?memChips(f,'calF',true,true):'')+body+(list?`<button class="fab" data-a="addEv" data-date="${sel}">+</button>`:'')}
 
 function evForm(e){
@@ -789,10 +789,10 @@ function chatCalHTML(){
     cells+=`<div class="d ${d.getMonth()!==m-1?'o':''} ${ds===t?'today':''} ${ds===sel?'sel':''} ${d.getDay()===0?'sun':d.getDay()===6?'sat':''}" data-a="chatPick" data-id="${ds}"><div class="n">${d.getDate()}</div>${cnt[ds]?`<div class="c" title="대화 ${cnt[ds]}개"></div>`:''}</div>`}
   return `<div class="chatcal" style="margin-bottom:10px"><div class="chbar"><button class="btn sm" data-a="chatMon" data-id="-1">‹</button><b>${y}년 ${m}월</b><button class="btn sm" data-a="chatMon" data-id="1">›</button></div><div class="cal">${cells}</div><div class="muted" style="margin-top:6px;font-size:12px">점이 있는 날은 대화가 있어요. 날짜를 누르면 그날의 대화를 볼 수 있어요.</div></div>`}
 function vChat(){
-  if(!members().length)return head('가족 대화')+'<div class="empty">설정에서 가족을 먼저 추가해 주세요</div>';
+  if(!members().length)return head('대화')+'<div class="empty">설정에서 가족을 먼저 추가해 주세요</div>';
   const day=chatDayOf(),isT=day===TODAY();
   const bar=`<div class="chbar"><button class="btn sm" data-a="chatDayNav" data-id="-1">‹</button><b>${isT?'오늘 · ':''}${fmtK(day)}</b><button class="btn sm" data-a="chatDayNav" data-id="1" ${isT?'disabled':''}>›</button><button class="btn sm ${UI.chatCal?'pri':''}" data-a="chatCalToggle">📅 달력</button>${isT?'':'<button class="btn sm" data-a="chatToday">오늘</button>'}</div>`;
-  return head('가족 대화')+`<div id="chatpage">${bar}${UI.chatCal?chatCalHTML():''}<div class="chat">${bubbles(chatMsgs(0,day),false)}</div>${isT?composeHTML():''}</div>`}
+  return head('대화')+`<div id="chatpage">${bar}${UI.chatCal?chatCalHTML():''}<div class="chat">${bubbles(chatMsgs(0,day),false)}</div>${isT?composeHTML():''}</div>`}
 
 /* --- 시간표 --- */
 function ttRec(mid){return D.tt.find(x=>x.id===mid&&!x.del)||{id:mid,n:6,cells:{}}}
