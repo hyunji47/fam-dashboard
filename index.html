@@ -416,7 +416,7 @@ let D=Object.assign(blank(),lsGet(K_DATA,{}));
 LISTS.forEach(l=>{if(!Array.isArray(D[l]))D[l]=[]});
 if(!D.settings)D.settings=blank().settings;
 let UI=Object.assign({tab:'home',month:TODAY().slice(0,7),sel:TODAY(),calView:'month',todoM:null,ttM:null,hM:null,mealOff:0,calF:[],color:'#2f6bff',mode:'auto',bg:'',who:'',chatDay:'',chatCal:false,chatMonth:'',ttDay:-1,mealTab:''},lsGet(K_UI,{}));
-let ME=lsGet(K_ME,null);if(UI.tab==='board')UI.tab='chat';UI.ttDay=-1;
+let ME=lsGet(K_ME,null);if(UI.tab==='board')UI.tab='chat';UI.ttDay=-1;UI.todoM=null;
 const saveUI=()=>lsSet(K_UI,UI);
 const live=l=>D[l].filter(x=>!x.del);
 const mem=id=>D.members.find(m=>m.id===id&&!m.del);
@@ -540,7 +540,7 @@ const evColor=e=>{if(e.src==='hd')return e.hol?'#e5484d':'#8a93a6';if(e.color)re
 const evWho=e=>!(e.members||[]).length?'온 가족':e.members.map(id=>mem(id)).filter(Boolean).map(m=>m.name).join(', ');
 function evRow(e,showDate){
   if(e.src==='hd')return `<div class="ev"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${esc(e.title)}</div><div class="muted">${showDate?fmtK(e.date)+' · ':''}${e.hol?'공휴일':'기념일'}</div></div></div>`;
-  return `<div class="ev" data-a="${e.src==='hl'?'goHealth':'editEv'}" data-id="${e.id}" data-m="${esc((e.members||[])[0]||'')}" style="cursor:pointer"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${esc(e.title)}</div><div class="muted">${showDate?fmtK(e.date)+' · ':''}${e.time?esc(e.time)+' · ':''}${esc(evWho(e))}${e.memo?' · '+esc(e.memo):''}</div></div></div>`}
+  return `<div class="ev" ${isKidMe()?'':`data-a="${e.src==='hl'?'goHealth':'editEv'}" data-id="${e.id}" data-m="${esc((e.members||[])[0]||'')}"`} style="${isKidMe()?'':'cursor:pointer'}"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${esc(e.title)}</div><div class="muted">${showDate?fmtK(e.date)+' · ':''}${e.time?esc(e.time)+' · ':''}${esc(evWho(e))}${e.memo?' · '+esc(e.memo):''}</div></div></div>`}
 
 /* ============ 날씨 (기상청) ============ */
 const WMO=c=>c===0?['☀️','맑음']:c<=2?['🌤️','구름 조금']:c===3?['☁️','흐림']:c<=48?['🌫️','안개']:c<=57?['🌦️','이슬비']:c<=67?['🌧️','비']:c<=77?['🌨️','눈']:c<=82?['🌧️','소나기']:c<=86?['🌨️','눈 소나기']:['⛈️','뇌우'];
@@ -664,9 +664,11 @@ function render(){
   window.scrollTo(0,st);document.querySelectorAll('.wide .col').forEach((c,i)=>{c.scrollTop=cs[i]||0});
   document.querySelectorAll('.chatbox').forEach(b=>b.scrollTop=b.scrollHeight);
   const nc=document.querySelector('#chatpage .chat');if(nc){nc.scrollTop=(ocB||chatStick||!oc)?nc.scrollHeight:ocT;if(chatStick)window.scrollTo(0,0)}
-  chatStick=false;if(UI.tab==='chat')setTimeout(markRead,0)}
+  chatStick=false;if(UI.tab==='chat')setTimeout(markRead,0);
+  if(members().length&&!meSel()&&UI.tab!=='set'&&!modalOpen())openModal(`<h2>🙋 먼저 '나는 누구?'를 설정해 주세요</h2><div class="muted" style="margin:8px 0 14px">이 기기를 쓰는 사람을 정해야 할 일·대화·일정을 사용할 수 있어요. 설정 탭의 '나는 누구?'에서 선택해 주세요.</div><button class="btn pri" style="width:100%" data-a="goSetMe">설정으로 이동</button>`)}
 function meSel(){return ME&&mem(ME)?ME:null}
 /* 이 기기에서 '나는 누구?'가 아이로 지정돼 있으면 건강·설정 일부를 숨김 */
+const canT=mid=>!isKidMe()||mid===ME;
 const isKidMe=()=>{const m=ME?mem(ME):null;return !!m&&m.role==='child'};
 
 /* --- 홈 (와이드 보드) --- */
@@ -722,7 +724,7 @@ const avatar=(m,sz)=>`<span class="av" style="background:${esc(m.color)};${sz?`w
 function memTodoCard(m){
   const all=live('todos').filter(t=>t.member===m.id&&(!todoDone(t)||t.doneOn===TODAY()));
   const open=all.filter(t=>!todoDone(t)),done=all.filter(todoDone),total=all.length,pct=total?Math.round(done.length/total*100):0;
-  return `<div class="card pc" style="--mc:${esc(m.color)}"><h2>${avatar(m,30)} ${esc(m.name)}<span class="sp"></span><span class="stars">${done.length}/${total}</span></h2>${total?`<div class="prog"><i style="width:${pct}%"></i></div>`:''}${open.map(todoRow).join('')}${done.map(todoRow).join('')}${total?'':'<div class="empty">할 일이 없어요 🎈</div>'}<div style="margin-top:6px"><input type="text" class="qa" placeholder="+ 할 일 추가 (Enter)" data-enter="quickAdd" data-m="${m.id}"></div></div>`}
+  return `<div class="card pc" style="--mc:${esc(m.color)}"><h2>${avatar(m,30)} ${esc(m.name)}<span class="sp"></span><span class="stars">${done.length}/${total}</span></h2>${total?`<div class="prog"><i style="width:${pct}%"></i></div>`:''}${open.map(todoRow).join('')}${done.map(todoRow).join('')}${total?'':'<div class="empty">할 일이 없어요 🎈</div>'}${canT(m.id)?`<div style="margin-top:6px"><input type="text" class="qa" placeholder="+ 할 일 추가 (Enter)" data-enter="quickAdd" data-m="${m.id}"></div>`:''}</div>`}
 function centerNow(){
   const hm=nowHM();document.querySelectorAll('.hs').forEach(h=>{const cs=[...h.querySelectorAll('.hi2')];if(!cs.length)return;
     const t=h.querySelector('.hi2.now')||cs.find(c=>(c.dataset.s||'')>hm)||cs[cs.length-1];
@@ -732,7 +734,7 @@ let LASTSIG='';
 function schoolToday(){
   const ks=kids();if(!ks.length)return '';const dow=(new Date().getDay()+6)%7,hm=nowHM();
   return `<div class="card"><h2>🎒 오늘 시간표 <span class="muted" style="font-size:12px;font-weight:400">${fmtK(TODAY())}</span></h2>`+ks.map(k=>{const es=kidSched(k.id,dow);
-    return `<div class="schk"><div>${avatar(k,26)} <b>${esc(k.name)}</b></div><div class="hs">${es.map(e=>`<div class="hi2 k-${e.kind||'school'} ${e.color?'ec':''} ${e.start<=hm&&hm<(e.end||'24:00')?'now':''}" data-a="editSched" data-id="${e.id}" style="${e.color?`--ec:${e.color};`:''}cursor:pointer" data-s="${esc(e.start)}"><div class="tm">${esc(e.start)}${e.end?'~'+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')||`<span class="muted">${dow>4?'주말이에요 🎈':'등록된 일정이 없어요 (시간표 탭에서 추가)'}</span>`}</div></div>`}).join('')+`</div>`}
+    return `<div class="schk"><div>${avatar(k,26)} <b>${esc(k.name)}</b></div><div class="hs">${es.map(e=>`<div class="hi2 k-${e.kind||'school'} ${e.color?'ec':''} ${e.start<=hm&&hm<(e.end||'24:00')?'now':''}" ${isKidMe()?'':`data-a="editSched" data-id="${e.id}"`} style="${e.color?`--ec:${e.color};`:''}${isKidMe()?'':'cursor:pointer'}" data-s="${esc(e.start)}"><div class="tm">${esc(e.start)}${e.end?'~'+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')||`<span class="muted">${dow>4?'주말이에요 🎈':'등록된 일정이 없어요 (시간표 탭에서 추가)'}</span>`}</div></div>`}).join('')+`</div>`}
 function mealToday(){
   const sch=schools();if(!kids().length)return '';
   if(!sch.length)return `<div class="card"><h2>🍱 오늘 급식</h2><div class="muted">설정에서 아이의 학교를 등록하면 오늘 급식이 보여요</div></div>`;
@@ -783,7 +785,7 @@ function vHome(){
   return `<div class="ptop">${pt?`<div class="ptitle">${esc(pt)}</div>`:'<span></span>'}<button class="rfbtn" data-a="homeRefresh" title="새로고침" aria-label="새로고침">↻</button></div><div class="wide ${pt?'hast':''}" style="--c1:${cw[0]}fr;--c2:${cw[1]}fr;--c3:${cw[2]}fr">${heroHTML()}
   <div class="col">
    <div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(UI.calF,'calF',true,true):''}<div class="cal hcal">${calCells(y,m,UI.calF,t,sel)}</div></div>
-   <div class="card"><h2>${sel===t?'오늘':fmtK(sel)} 일정 <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 추가</button></h2>${selEv.length?selEv.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요 🎈</div>'}</div>
+   <div class="card"><h2>${sel===t?'오늘':fmtK(sel)} 일정 <span class="sp"></span>${isKidMe()?'':`<button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 추가</button>`}</h2>${selEv.length?selEv.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요 🎈</div>'}</div>
    <div class="card"><h2>⏭️ 앞으로 7일</h2>${up.length?up.slice(0,8).map(e=>evRow(e,true)).join(''):'<div class="empty">예정된 일정이 없어요</div>'}</div>
   </div>
   <div class="rz" data-rz="0" title="드래그해서 넓이 조절 · 더블클릭하면 원래대로"></div>
@@ -819,9 +821,9 @@ function vCal(){
   const list=UI.calView==='list';
   let body;
   if(list){const days=[];for(let i=0;i<60;i++){const ds=ymd(addD(new Date(),i));const es=eventsOn(ds).filter(pass);if(es.length)days.push(`<div class="card"><h2>${fmtK(ds)}${ds===t?' · 오늘':''}</h2>${es.map(e=>evRow(e)).join('')}</div>`)}body=days.join('')||'<div class="empty">앞으로 60일간 일정이 없어요</div>'}
-  else{const es=eventsOn(sel).filter(pass);body=`<div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(f,'calF',true,true):''}<div class="cal hcal">${cells}</div></div><div class="card" style="margin-top:12px"><h2>${fmtK(sel)} <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 일정</button></h2>${es.length?es.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요</div>'}</div>`}
+  else{const es=eventsOn(sel).filter(pass);body=`<div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(f,'calF',true,true):''}<div class="cal hcal">${cells}</div></div><div class="card" style="margin-top:12px"><h2>${fmtK(sel)} <span class="sp"></span>${isKidMe()?'':`<button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 일정</button>`}</h2>${es.length?es.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요</div>'}</div>`}
   return head('달력',`<button class="btn sm" data-a="calView" data-id="${list?'month':'list'}">${list?'달력':'목록'}</button>`)+
-  (list&&members().length?memChips(f,'calF',true,true):'')+body+(list?`<button class="fab" data-a="addEv" data-date="${sel}">+</button>`:'')}
+  (list&&members().length?memChips(f,'calF',true,true):'')+body+(list&&!isKidMe()?`<button class="fab" data-a="addEv" data-date="${sel}">+</button>`:'')}
 
 function evForm(e){
   e=e||{};const sel=e.members||[];
@@ -836,23 +838,23 @@ function evForm(e){
 
 /* --- 할 일 --- */
 const todoDone=t=>t.repeat==='daily'?t.doneOn===TODAY():!!t.done;
-function todoRow(t){const m=mem(t.member);return `<div class="todo ${todoDone(t)?'done':''}"><input type="checkbox" ${todoDone(t)?'checked':''} data-a="togTodo" data-id="${t.id}"><div class="tx" data-a="editTodo" data-id="${t.id}">${esc(t.text)}<div class="muted">${m?memDot(m)+' '+esc(m.name)+' · ':''}${t.repeat==='daily'?'🔁 매일 ':''}${t.due?'📆 '+fmtS(t.due):''}</div></div></div>`}
+function todoRow(t){const m=mem(t.member);return `<div class="todo ${todoDone(t)?'done':''}"><input type="checkbox" ${todoDone(t)?'checked':''} ${canT(t.member)?`data-a="togTodo" data-id="${t.id}"`:'disabled'}><div class="tx" ${canT(t.member)?`data-a="editTodo" data-id="${t.id}"`:''}>${esc(t.text)}<div class="muted">${m?memDot(m)+' '+esc(m.name)+' · ':''}${t.repeat==='daily'?'🔁 매일 ':''}${t.due?'📆 '+fmtS(t.due):''}</div></div></div>`}
 function vTodo(){
   const ms=members();if(!ms.length)return head('할 일')+'<div class="empty">설정에서 가족을 먼저 추가해 주세요</div>';
   if(window.matchMedia('(min-width:900px)').matches){
     return head('할 일')+`<div class="grid g2">${ms.map(m=>{const all=live('todos').filter(t=>t.member===m.id);const open=all.filter(t=>!todoDone(t)).sort((x,y)=>(x.due||'9').localeCompare(y.due||'9')),done=all.filter(todoDone);
       return `<div class="card pc" style="--mc:${esc(m.color)}"><h2>${avatar(m,30)} ${esc(m.name)}<span class="sp"></span><span class="stars">${done.length}/${all.length}</span></h2>${all.length?`<div class="prog"><i style="width:${Math.round(done.length/all.length*100)}%"></i></div>`:''}
-      <div style="margin:6px 0"><input type="text" class="qa" placeholder="+ 할 일 추가 (Enter)" data-enter="quickAdd" data-m="${m.id}"></div>
+      ${canT(m.id)?`<div style="margin:6px 0"><input type="text" class="qa" placeholder="+ 할 일 추가 (Enter)" data-enter="quickAdd" data-m="${m.id}"></div>`:''}
       ${open.map(todoRow).join('')||'<div class="empty">없어요 🎉</div>'}
-      ${done.length?`<div class="muted" style="margin:10px 0 2px;display:flex;align-items:center">완료 ${done.length}<button class="btn sm" style="margin-left:auto" data-a="clearDone" data-id="${m.id}">완료 지우기</button></div>${done.map(todoRow).join('')}`:''}</div>`}).join('')}</div>`}
-  const cur=UI.todoM&&mem(UI.todoM)?UI.todoM:(meSel()||ms[0].id);
+      ${done.length?`<div class="muted" style="margin:10px 0 2px;display:flex;align-items:center">완료 ${done.length}${canT(m.id)?`<button class="btn sm" style="margin-left:auto" data-a="clearDone" data-id="${m.id}">완료 지우기</button>`:''}</div>${done.map(todoRow).join('')}`:''}</div>`}).join('')}</div>`}
+  const cur=UI.todoM==='*'||(UI.todoM&&mem(UI.todoM))?UI.todoM:(meSel()||ms[0].id);
   const all=live('todos').filter(t=>t.member===cur||(cur==='*'));
   const open=all.filter(t=>!todoDone(t)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   const done=all.filter(todoDone);
-  return head('할 일')+`<div class="chips">${ms.map(m=>`<span class="chip ${m.id===cur?'on':''}" data-a="todoM" data-id="${m.id}">${memDot(m)}${esc(m.name)} <span class="muted">${live('todos').filter(t=>t.member===m.id&&!todoDone(t)).length}</span></span>`).join('')}</div>
-  <div class="card"><div class="row"><input type="text" id="newTodo" placeholder="할 일 추가" style="flex:1;margin:0" data-enter="addTodo"><button class="btn pri" data-a="addTodo">추가</button></div></div>
+  return head('할 일')+`<div class="chips"><span class="chip ${cur==='*'?'on':''}" data-a="todoM" data-id="*">전체 <span class="muted">${live('todos').filter(t=>!todoDone(t)).length}</span></span>${ms.map(m=>`<span class="chip ${m.id===cur?'on':''}" data-a="todoM" data-id="${m.id}">${memDot(m)}${esc(m.name)} <span class="muted">${live('todos').filter(t=>t.member===m.id&&!todoDone(t)).length}</span></span>`).join('')}</div>
+  ${cur!=='*'&&canT(cur)?`<div class="card"><div class="row"><input type="text" id="newTodo" placeholder="할 일 추가" style="flex:1;margin:0" data-enter="addTodo"><button class="btn pri" data-a="addTodo">추가</button></div></div>`:''}
   <div class="card"><h2>해야 할 일</h2>${open.map(todoRow).join('')||'<div class="empty">없어요 🎉</div>'}</div>
-  ${done.length?`<div class="card"><h2>완료 <span class="sp"></span><button class="btn sm" data-a="clearDone" data-id="${cur}">완료 지우기</button></h2>${done.map(todoRow).join('')}</div>`:''}`}
+  ${done.length?`<div class="card"><h2>완료 <span class="sp"></span>${cur!=='*'&&canT(cur)?`<button class="btn sm" data-a="clearDone" data-id="${cur}">완료 지우기</button>`:''}</h2>${done.map(todoRow).join('')}</div>`:''}`}
 function todoForm(t){
   openModal(`<h2>할 일 수정</h2><label class="l">내용</label><input type="text" id="f_text" value="${esc(t.text)}">
   <label class="l">담당</label><select id="f_who">${members().map(m=>`<option value="${m.id}" ${m.id===t.member?'selected':''}>${esc(m.name)}</option>`).join('')}</select>
@@ -861,7 +863,7 @@ function todoForm(t){
   <div class="row"><button class="btn pri" style="flex:1" data-a="saveTodo" data-id="${t.id}">저장</button><button class="btn danger" data-a="delTodo" data-id="${t.id}">삭제</button><button class="btn" data-a="close">닫기</button></div>`)}
 
 /* --- 가족 대화 --- */
-const chatWho=()=>{const ms=members();return (UI.who&&mem(UI.who)?UI.who:(meSel()||(ms[0]||{}).id))||''};
+const chatWho=()=>{const ms=members();if(meSel())return meSel();return (UI.who&&mem(UI.who)?UI.who:((ms[0]||{}).id))||''};
 const tmk=t=>new Date(t).toLocaleTimeString('ko-KR',{hour:'numeric',minute:'2-digit'});
 const chatAll=()=>live('chat').sort((x,y)=>x.t-y.t);
 const chatDayOf=()=>UI.chatDay||TODAY();
@@ -890,7 +892,7 @@ function markRead(){
   const ms=chatMsgs(0,chatDayOf()).filter(m=>m.by!==ME&&!(m.rd&&m.rd[ME]));if(!ms.length)return;
   const t=Date.now();ms.forEach(m=>{m.rd=Object.assign({},m.rd,{[ME]:t});m.u=t});changed()}
 function composeHTML(){const ms=members();
-  return `<div class="compose"><select id="chatWho" title="보내는 사람">${ms.map(m=>`<option value="${m.id}" ${m.id===chatWho()?'selected':''}>${esc(m.name)}</option>`).join('')}</select><textarea id="chatIn" rows="1" placeholder="메시지" data-enter="chatSend"></textarea><button class="btn pri" data-a="chatSend">보내기</button></div>`}
+  return `<div class="compose">${meSel()?`<span class="muted" style="flex:none;align-self:center;font-weight:700">${avatar(mem(meSel()),26)}</span>`:`<select id="chatWho" title="보내는 사람">${ms.map(m=>`<option value="${m.id}" ${m.id===chatWho()?'selected':''}>${esc(m.name)}</option>`).join('')}</select>`}<textarea id="chatIn" rows="1" placeholder="메시지" data-enter="chatSend"></textarea><button class="btn pri" data-a="chatSend">보내기</button></div>`}
 function chatCalHTML(){
   const mo=UI.chatMonth||chatDayOf().slice(0,7);const[y,m]=mo.split('-').map(Number);const cnt={};chatAll().forEach(x=>{const k=ymd(new Date(x.t));cnt[k]=(cnt[k]||0)+1});
   const first=new Date(y,m-1,1),start=addD(first,-first.getDay()),t=TODAY(),sel=chatDayOf();let cells=DOW.map(d=>`<div class="h">${d}</div>`).join('');
@@ -915,7 +917,7 @@ function ttBlocks(cid,d,H0,HH,hm,today){
   const it=kidSched(cid,d).map(e=>({e,s:ttMin(e.start),f:Math.max(ttMin(e.end)||ttMin(e.start)+50,ttMin(e.start)+25),l:0,n:1}));
   it.forEach((a,x)=>{const used=new Set();it.forEach((b,y)=>{if(y<x&&b.s<a.f&&a.s<b.f)used.add(b.l)});let l=0;while(used.has(l))l++;a.l=l});
   it.forEach(a=>{let n=a.l+1;it.forEach(b=>{if(b.s<a.f&&a.s<b.f)n=Math.max(n,b.l+1)});a.n=n});
-  return it.map(({e,s:st,f,l,n})=>`<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)" data-a="editSched" data-id="${e.id}"><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')}
+  return it.map(({e,s:st,f,l,n})=>`<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)"${isKidMe()?'':` data-a="editSched" data-id="${e.id}"`}><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')}
 function ttAxis(H0,H1,HH){return `<div class="tgl"><div class="sp"></div><div class="tgx" style="height:${(H1-H0)*HH}px">${Array.from({length:H1-H0},(_,k)=>`<div class="hl" style="top:${k*HH}px">${String(H0+k).padStart(2,'0')}:00</div>`).join('')}</div></div>`}
 function vTT(){
   const ks=kids();if(!ks.length)return head('시간표')+'<div class="empty">시간표는 "아이"로 등록한 가족만 사용해요.<br>설정에서 구분을 "아이"로 지정해 주세요</div>';
@@ -929,7 +931,7 @@ function vTT(){
     const cols=sel.map(id=>{const m=mem(id);return `<div class="sgc mkc ${d_cls(selD,today)}"><div class="mkh">${avatar(m,22)}<b>${esc(m.name)}</b></div><div class="tgb" style="height:${(H1-H0)*HH}px">${ttBlocks(id,selD,H0,HH,hm,today)}</div></div>`}).join('');
     return head('시간표')+(ks.length>2?`<div class="chips">${ks.map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="ttPick" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div><div class="muted" style="margin:-4px 0 8px">두 명까지 함께 볼 수 있어요</div>`:'')+
     `<div class="card">${dtabs}<div class="sg tg mk">${ttAxis(H0,H1,HH)}${cols}</div>
-    <div class="row" style="margin-top:10px">${sel.map(id=>`<button class="btn pri sm" data-a="addSched" data-id="${id}" data-d="${selD}">+ ${esc(mem(id).name)}</button>`).join('')}<span class="muted">일정을 누르면 수정·삭제할 수 있어요</span></div></div>`}
+    ${isKidMe()?'':`<div class="row" style="margin-top:10px">${sel.map(id=>`<button class="btn pri sm" data-a="addSched" data-id="${id}" data-d="${selD}">+ ${esc(mem(id).name)}</button>`).join('')}<span class="muted">일정을 누르면 수정·삭제할 수 있어요</span></div>`}</div>`}
   const cur=UI.ttM&&mem(UI.ttM)?UI.ttM:ks[0].id;const all=kidSched(cur);
   const nd=all.some(x=>(x.days||[]).some(d=>d>=5))||selD>=5?7:5;
   let lo=8*60,hi=17*60;all.forEach(e=>{lo=Math.min(lo,ttMin(e.start));hi=Math.max(hi,ttMin(e.end)||ttMin(e.start)+50)});
@@ -940,7 +942,7 @@ function vTT(){
   return head('시간표')+`<div class="chips">${ks.map(m=>`<span class="chip ${m.id===cur?'on':''}" data-a="ttM" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div>
   <div class="card">${dtabs}
   <div class="sg tg" style="--nd:${nd}">${cols}</div>
-  <div class="row" style="margin-top:10px"><button class="btn pri sm" data-a="addSched" data-id="${cur}" data-d="${selD}">+ 일정 추가</button>${hasLegacy?`<button class="btn sm" data-a="impTT" data-id="${cur}">기존 교시표 가져오기</button>`:''}<span class="muted">시간 기준으로 학교 수업·학원 일정을 적어요. 일정을 누르면 수정·삭제할 수 있어요</span></div></div>`}
+  ${isKidMe()?'':`<div class="row" style="margin-top:10px"><button class="btn pri sm" data-a="addSched" data-id="${cur}" data-d="${selD}">+ 일정 추가</button>${hasLegacy?`<button class="btn sm" data-a="impTT" data-id="${cur}">기존 교시표 가져오기</button>`:''}<span class="muted">시간 기준으로 학교 수업·학원 일정을 적어요. 일정을 누르면 수정·삭제할 수 있어요</span></div>`}</div>`}
 const d_cls=(d,t)=>d===t?'today':'';
 function schedForm(e){
   const days=e.days||[],k=e.kind||'school';
@@ -1027,29 +1029,30 @@ function memForm(m){
 
 /* ============ 이벤트 처리 ============ */
 const A={
- tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat')UI.chatCal=false;if(d.id==='tt'&&UI.tab!=='tt')UI.ttDay=-1;UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
+ tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat')UI.chatCal=false;if(d.id==='tt'&&UI.tab!=='tt')UI.ttDay=-1;if(d.id==='todo'&&UI.tab!=='todo')UI.todoM=null;UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
  close(){closeModal()},
  selDate(d){UI.sel=d.id;UI.month=d.id.slice(0,7);saveUI();render()},
  mon(d){const[y,m]=UI.month.split('-').map(Number);const x=new Date(y,m-1+(+d.id),1);UI.month=x.getFullYear()+'-'+pad(x.getMonth()+1);saveUI();render()},
  monToday(){UI.month=TODAY().slice(0,7);UI.sel=TODAY();saveUI();render()},
  calView(d){UI.calView=d.id;saveUI();render()},
  calF(d){if(!d.id)UI.calF=[];else UI.calF=UI.calF.includes(d.id)?UI.calF.filter(x=>x!==d.id):[...UI.calF,d.id];saveUI();render()},
- addEv(d){evForm({date:d.date})},
- editEv(d){const e=D.events.find(x=>x.id===d.id);if(e)evForm(e)},
+ addEv(d){if(isKidMe())return;evForm({date:d.date})},
+ editEv(d){if(isKidMe())return;const e=D.events.find(x=>x.id===d.id);if(e)evForm(e)},
  goHealth(d){if(isKidMe())return;UI.tab='health';UI.hM=d.m;saveUI();render()},
  togChip(d,el){el.classList.toggle('on')},
- saveEv(d){const title=val('f_title').trim();if(!title){toast('제목을 입력하세요');return}
+ saveEv(d){if(isKidMe())return;const title=val('f_title').trim();if(!title){toast('제목을 입력하세요');return}
    const date=val('f_date')||TODAY();let end=val('f_end');if(end&&end<=date)end='';
    const mems=[...document.querySelectorAll('#f_mem .chip.on')].map(c=>c.dataset.id);
    const o={id:d.id||uid(),title,date,end,time:val('f_time'),memo:val('f_memo').trim(),members:mems,color:((document.querySelector('#f_ecol .chip.on')||{dataset:{}}).dataset.id||'')};
    $('#modal').classList.remove('on');upsert('events',o);$('#box').innerHTML=''},
- delEv(d){if(!confirm('삭제할까요?'))return;$('#modal').classList.remove('on');removeItem('events',d.id)},
+ delEv(d){if(isKidMe())return;if(!confirm('삭제할까요?'))return;$('#modal').classList.remove('on');removeItem('events',d.id)},
+ goSetMe(){$('#modal').classList.remove('on');$('#box').innerHTML='';UI.tab='set';saveUI();render()},
  setMe(d){const t=mem(d.id);if(D.settings.pwHash&&isKidMe()&&t&&t.role!=='child'){const v=prompt('어른으로 바꾸려면 설정 비밀번호를 입력하세요');if(v===null)return;if(pwHash(v,D.settings.pwSalt||'')!==D.settings.pwHash){toast('비밀번호가 맞지 않아요');return}}ME=d.id;lsSet(K_ME,ME);render()},
  todoM(d){UI.todoM=d.id;saveUI();render()},
- addTodo(){const el=$('#newTodo');const t=el.value.trim();if(!t)return;const who=UI.todoM&&mem(UI.todoM)?UI.todoM:(meSel()||members()[0].id);upsert('todos',{id:uid(),text:t,member:who,done:false})},
- togTodo(d,el){const t=D.todos.find(x=>x.id===d.id);if(!t)return;const n={...t};if(t.repeat==='daily')n.doneOn=el.checked?TODAY():'';else{n.done=el.checked;n.doneOn=el.checked?TODAY():''}upsert('todos',n);
+ addTodo(){if(UI.todoM==='*')return;if(isKidMe()&&(UI.todoM||ME)!==ME)return;const el=$('#newTodo');const t=el.value.trim();if(!t)return;const who=UI.todoM&&mem(UI.todoM)?UI.todoM:(meSel()||members()[0].id);upsert('todos',{id:uid(),text:t,member:who,done:false})},
+ togTodo(d,el){{const x=D.todos.find(y=>y.id===d.id);if(x&&!canT(x.member)){el.checked=!el.checked;return}}const t=D.todos.find(x=>x.id===d.id);if(!t)return;const n={...t};if(t.repeat==='daily')n.doneOn=el.checked?TODAY():'';else{n.done=el.checked;n.doneOn=el.checked?TODAY():''}upsert('todos',n);
    if(el.checked){const mine=live('todos').filter(x=>x.member===t.member&&(!todoDone(x)||x.doneOn===TODAY()));if(mine.length&&mine.every(todoDone)){const mm=mem(t.member);toast((mm?mm.name:'')+' 오늘 할 일을 모두 끝냈어요 🎉',3000)}}},
- quickAdd(d,el){const v=el.value.trim();if(!v)return;upsert('todos',{id:uid(),text:v,member:d.m,done:false})},
+ quickAdd(d,el){if(!canT(d.m))return;const v=el.value.trim();if(!v)return;upsert('todos',{id:uid(),text:v,member:d.m,done:false})},
  themeOpen(){openModal(`<h2>테마</h2>${themeBox()}<div class="row" style="margin-top:12px"><button class="btn pri" style="flex:1" data-a="close">완료</button></div>`)},
  setColor(d){UI.color=d.id;saveUI();themeChanged()},
  saveTitle(){const v=val('pgTitle').trim().slice(0,30);setSettings({title:v});document.title=v||'우리집 대시보드';toast(v?'홈 타이틀을 저장했어요':'홈 타이틀을 지웠어요')},
@@ -1062,16 +1065,16 @@ const A={
  pickColor(d,el){UI.color=el.value;saveUI();themeChanged()},
  liveBg(d,el){UI.bg=el.value;applyTheme()},
  pickBg(d,el){UI.bg=el.value;saveUI();themeChanged()},
- editTodo(d){const t=D.todos.find(x=>x.id===d.id);if(t)todoForm(t)},
- saveTodo(d){const t=D.todos.find(x=>x.id===d.id);if(!t)return;$('#modal').classList.remove('on');upsert('todos',{...t,text:val('f_text').trim()||t.text,member:val('f_who'),due:val('f_due'),repeat:val('f_rep')});$('#box').innerHTML=''},
- delTodo(d){$('#modal').classList.remove('on');removeItem('todos',d.id)},
- clearDone(d){D.todos.filter(t=>t.member===d.id&&!t.del&&todoDone(t)&&t.repeat!=='daily').forEach(t=>{t.del=true;t.u=Date.now()});changed()},
+ editTodo(d){{const x=D.todos.find(y=>y.id===d.id);if(x&&!canT(x.member))return}const t=D.todos.find(x=>x.id===d.id);if(t)todoForm(t)},
+ saveTodo(d){{const x=D.todos.find(y=>y.id===d.id);if(x&&!canT(x.member))return}const t=D.todos.find(x=>x.id===d.id);if(!t)return;$('#modal').classList.remove('on');upsert('todos',{...t,text:val('f_text').trim()||t.text,member:val('f_who'),due:val('f_due'),repeat:val('f_rep')});$('#box').innerHTML=''},
+ delTodo(d){{const x=D.todos.find(y=>y.id===d.id);if(x&&!canT(x.member))return}$('#modal').classList.remove('on');removeItem('todos',d.id)},
+ clearDone(d){if(!canT(d.id))return;D.todos.filter(t=>t.member===d.id&&!t.del&&todoDone(t)&&t.repeat!=='daily').forEach(t=>{t.del=true;t.u=Date.now()});changed()},
  chatCalToggle(){UI.chatCal=!UI.chatCal;UI.chatMonth=chatDayOf().slice(0,7);saveUI();render()},
  chatMon(d){const[y,m]=(UI.chatMonth||chatDayOf().slice(0,7)).split('-').map(Number);const n=new Date(y,m-1+(+d.id),1);UI.chatMonth=n.getFullYear()+'-'+pad(n.getMonth()+1);saveUI();render()},
  chatPick(d){UI.chatDay=d.id===TODAY()?'':d.id;saveUI();chatStick=true;render()},
  chatDayNav(d){const n=ymd(addD(pd(chatDayOf()),+d.id));if(n>TODAY())return;UI.chatDay=n===TODAY()?'':n;UI.chatMonth=n.slice(0,7);saveUI();render()},
  chatToday(){UI.chatDay='';UI.chatMonth='';saveUI();chatStick=true;render()},
- chatSend(){const el=$('#chatIn');if(!el)return;const v=el.value.trim();if(!v)return;const who=val('chatWho')||chatWho();if(!who){toast('먼저 가족을 추가하세요');return}
+ chatSend(){const el=$('#chatIn');if(!el)return;const v=el.value.trim();if(!v)return;const who=meSel()||val('chatWho')||chatWho();if(!who){toast('먼저 가족을 추가하세요');return}
    UI.who=who;saveUI();chatStick=UI.tab==='chat';el.value='';upsert('chat',{id:uid(),by:who,text:v,t:Date.now()})},
  rdTog(d){RDOPEN.has(d.id)?RDOPEN.delete(d.id):RDOPEN.add(d.id);render()},
  rxPick(d){RXP=RXP===d.id?null:d.id;render()},
@@ -1084,15 +1087,15 @@ const A={
  ttPick(d){let a=(UI.ttSel||[]).filter(id=>mem(id));if(!a.length)a=kids().slice(0,2).map(k=>k.id);a=a.includes(d.id)?(a.length>1?a.filter(x=>x!==d.id):a):[...a,d.id].slice(-2);UI.ttSel=a;saveUI();render()},
  ttM(d){UI.ttM=d.id;saveUI();render()},
  ttDay(d){UI.ttDay=+d.id;saveUI();render()},
- addSched(d){schedForm({member:d.id,days:[+d.d>=0?+d.d:0]})},
- editSched(d){const e=D.sched.find(x=>x.id===d.id);if(e)schedForm(e)},
- saveSched(d){const title=val('f_t').trim();if(!title){toast('내용을 입력하세요');return}
+ addSched(d){if(isKidMe())return;schedForm({member:d.id,days:[+d.d>=0?+d.d:0]})},
+ editSched(d){if(isKidMe())return;const e=D.sched.find(x=>x.id===d.id);if(e)schedForm(e)},
+ saveSched(d){if(isKidMe())return;const title=val('f_t').trim();if(!title){toast('내용을 입력하세요');return}
    const days=[...document.querySelectorAll('#f_days .chip.on')].map(c=>+c.dataset.id).sort();if(!days.length){toast('요일을 선택하세요');return}
    const start=val('f_s'),end=val('f_e');if(!start){toast('시작 시간을 입력하세요');return}if(end&&end<=start){toast('끝 시간이 시작보다 늦어야 해요');return}
    const o={id:d.id||uid(),member:d.m,title,kind:val('f_k')||'school',days,start,end,place:val('f_p').trim(),color:((document.querySelector('#f_scol .chip.on')||{dataset:{}}).dataset.id||'')};
    $('#modal').classList.remove('on');upsert('sched',o);$('#box').innerHTML=''},
- delSched(d,el){if(!el.dataset.sure){el.dataset.sure='1';el.textContent='한 번 더 누르면 삭제';return}$('#modal').classList.remove('on');removeItem('sched',d.id)},
- impTT(d){const r=ttRec(d.id);const to=m=>pad(Math.floor(m/60))+':'+pad(m%60);let n=0;
+ delSched(d,el){if(isKidMe())return;if(!el.dataset.sure){el.dataset.sure='1';el.textContent='한 번 더 누르면 삭제';return}$('#modal').classList.remove('on');removeItem('sched',d.id)},
+ impTT(d){if(isKidMe())return;const r=ttRec(d.id);const to=m=>pad(Math.floor(m/60))+':'+pad(m%60);let n=0;
    for(let p=1;p<=r.n;p++){const st=540+(p-1)*50;const by={};for(let dd=0;dd<5;dd++){const c=r.cells[dd+'-'+p];if(c)(by[c]=by[c]||[]).push(dd)}
      Object.entries(by).forEach(([t,days])=>{D.sched.push({id:uid(),member:d.id,title:t,kind:'school',days,start:to(st),end:to(st+40),place:'',u:Date.now()});n++})}
    changed();toast(n+'개 가져왔어요 (1교시 09:00, 40분 수업 기준 · 시간은 수정할 수 있어요)')},
