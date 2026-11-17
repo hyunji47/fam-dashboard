@@ -268,7 +268,7 @@ html[data-kt=unicorn] .btn,html[data-kt=unicorn] .chip{border-radius:99px}
 html[data-kt=unicorn] .btn.pri{background:linear-gradient(135deg,#a78bfa,#f472b6);border-color:transparent;color:#fff}
 html[data-kt=unicorn] .top h1::before{content:'🦄 '}
 html[data-kt=unicorn] .hero .date::after{content:' 🦄'}
-#chatpage{display:flex;flex-direction:column;height:calc(100dvh - 150px - env(safe-area-inset-bottom));min-height:360px;margin-bottom:0}
+#chatpage{background:none;border:0;box-shadow:none;padding:0;display:flex;flex-direction:column;height:calc(100dvh - 150px - env(safe-area-inset-bottom));min-height:360px;margin-bottom:0}
 @media(min-width:900px){#chatpage{height:calc(100dvh - 100px)}}
 #chatpage .chat{flex:1 1 auto;min-height:0;overflow-y:auto;margin-bottom:12px}
 #chatpage .chatcal{flex:0 1 auto;max-height:52%;overflow-y:auto}
@@ -675,9 +675,9 @@ function heroHTML(){
     src=WX.src==='kma-om'?'기상청 모델':'Open-Meteo';
     fc=dd.time.slice(1,6).map((t,i)=>`<div><span>${DOW[pd(t).getDay()]}</span>${WMO(dd.weather_code[i+1])[0]}<b>${Math.round(dd.temperature_2m_max[i+1])}°</b></div>`).join('')}
   return `<div class="card hero whead">
-   <div class="hA"><div class="hd1"><div class="date">${dt}</div><div class="hi">${greet()}</div></div><div class="clk">${tm}</div><i class="vsep"></i>
+   <div class="hA"><div class="hd1"><div class="date">${dt}</div><div class="hi">${greet()}</div></div><i class="vsep"></i>
     ${WX?`<div class="hw"><span class="ic">${ic}</span><b>${temp}</b><div><div class="sub2" title="${esc(wxSrc())}">${info}</div><div class="sub3">${src}</div></div></div>`:`<div class="hw muted">날씨 불러오는 중…</div>`}</div>
-   <div class="hC"><div class="c1"><span class="ic">${ic}</span><b>${temp}</b><div class="rt"><div class="clk">${tm}</div><div class="dt">${dt}</div><div class="hi">${greet()}</div></div></div>
+   <div class="hC"><div class="c1"><span class="ic">${ic}</span><b>${temp}</b><div class="rt"><div class="dt">${dt}</div><div class="hi">${greet()}</div></div></div>
     <div class="c2"><div class="sub2" title="${esc(wxSrc())}">${WX?info:'날씨 불러오는 중…'}</div></div>${WX?`<div class="fc2">${fc}</div>`:''}</div></div>`}
 function vHome(){
   const t=TODAY(),d=new Date();
@@ -699,7 +699,7 @@ function vHome(){
   <div class="col">
    ${schoolToday()}
    ${mealToday()}
-   <div class="card"><h2>💬 가족 대화 <span class="sp"></span><button class="btn sm" data-a="tab" data-id="chat">전체 보기</button></h2><div class="chat chatbox" style="max-height:250px;overflow-y:auto;padding-right:2px">${bubbles(chatMsgs(0),false)}</div>${composeHTML()}</div>
+   <div class="card"><h2>💬 가족 대화 <span class="sp"></span><button class="btn sm" data-a="tab" data-id="chat">전체 보기</button></h2><div class="chat chatbox" style="max-height:250px;overflow-y:auto;padding-right:2px">${bubbles(chatMsgs(0),false)}</div></div>
    ${soon.length?`<div class="card"><h2>💉 곧 챙길 건강 일정</h2>${soon.map(o=>`<div class="ev"><div class="bar" style="background:${o.over?'var(--danger)':'var(--accent)'}"></div><div><div class="t">${esc(o.name)}</div><div class="muted">${fmtY(ymd(o.s))} ~ ${fmtY(ymd(o.e))}${o.over?' · 기간 지남':''}</div></div></div>`).join('')}<div class="muted" style="margin-top:6px">참고용이에요. 정확한 일정은 소아과·예방접종도우미에서 확인하세요.</div></div>`:''}
   </div>
   <div class="rz" data-rz="1" title="드래그해서 넓이 조절 · 더블클릭하면 원래대로"></div>
@@ -728,10 +728,9 @@ function vCal(){
   const list=UI.calView==='list';
   let body;
   if(list){const days=[];for(let i=0;i<60;i++){const ds=ymd(addD(new Date(),i));const es=eventsOn(ds).filter(pass);if(es.length)days.push(`<div class="card"><h2>${fmtK(ds)}${ds===t?' · 오늘':''}</h2>${es.map(e=>evRow(e)).join('')}</div>`)}body=days.join('')||'<div class="empty">앞으로 60일간 일정이 없어요</div>'}
-  else{const es=eventsOn(sel).filter(pass);body=`<div class="cal hcal">${cells}</div><div class="card" style="margin-top:12px"><h2>${fmtK(sel)} <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 일정</button></h2>${es.length?es.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요</div>'}</div>`}
+  else{const es=eventsOn(sel).filter(pass);body=`<div class="card"><h2>📅 ${y}년 ${m}월 <span class="sp"></span><button class="btn sm" data-a="mon" data-id="-1">‹</button><button class="btn sm" data-a="monToday">오늘</button><button class="btn sm" data-a="mon" data-id="1">›</button></h2>${members().length?memChips(f,'calF',true,true):''}<div class="cal hcal">${cells}</div></div><div class="card" style="margin-top:12px"><h2>${fmtK(sel)} <span class="sp"></span><button class="btn sm pri" data-a="addEv" data-date="${sel}">+ 일정</button></h2>${es.length?es.map(e=>evRow(e)).join(''):'<div class="empty">일정이 없어요</div>'}</div>`}
   return head('캘린더',`<button class="btn sm" data-a="calView" data-id="${list?'month':'list'}">${list?'달력':'목록'}</button>`)+
-  `<div class="row sp" style="margin-bottom:8px"><button class="btn" data-a="mon" data-id="-1">‹</button><b>${y}년 ${m}월</b><span><button class="btn sm" data-a="monToday">오늘</button> <button class="btn" data-a="mon" data-id="1">›</button></span></div>`+
-  (members().length?memChips(f,'calF',true,true):'')+body+(list?`<button class="fab" data-a="addEv" data-date="${sel}">+</button>`:'')}
+  (list&&members().length?memChips(f,'calF',true,true):'')+body+(list?`<button class="fab" data-a="addEv" data-date="${sel}">+</button>`:'')}
 
 function evForm(e){
   e=e||{};const sel=e.members||[];
@@ -793,7 +792,7 @@ function vChat(){
   if(!members().length)return head('가족 대화')+'<div class="empty">설정에서 가족을 먼저 추가해 주세요</div>';
   const day=chatDayOf(),isT=day===TODAY();
   const bar=`<div class="chbar"><button class="btn sm" data-a="chatDayNav" data-id="-1">‹</button><b>${isT?'오늘 · ':''}${fmtK(day)}</b><button class="btn sm" data-a="chatDayNav" data-id="1" ${isT?'disabled':''}>›</button><button class="btn sm ${UI.chatCal?'pri':''}" data-a="chatCalToggle">📅 달력</button>${isT?'':'<button class="btn sm" data-a="chatToday">오늘</button>'}</div>`;
-  return head('가족 대화')+`<div class="card" id="chatpage">${bar}${UI.chatCal?chatCalHTML():''}<div class="muted" style="margin-bottom:10px">${isT?'대화는 매일 새로 시작돼요. 지난 대화는 📅 달력에서 볼 수 있어요. 말풍선을 누르면 수정·삭제할 수 있어요.':'지난 대화를 보는 중이에요.'}</div><div class="chat">${bubbles(chatMsgs(0,day),false)}</div>${isT?composeHTML():''}</div>`}
+  return head('가족 대화')+`<div id="chatpage">${bar}${UI.chatCal?chatCalHTML():''}<div class="chat">${bubbles(chatMsgs(0,day),false)}</div>${isT?composeHTML():''}</div>`}
 
 /* --- 시간표 --- */
 function ttRec(mid){return D.tt.find(x=>x.id===mid&&!x.del)||{id:mid,n:6,cells:{}}}
