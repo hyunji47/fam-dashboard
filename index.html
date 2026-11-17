@@ -514,13 +514,14 @@ const memLabel=m=>m?`${esc(m.emoji||'')} ${esc(m.name)}`:'온 가족';
 function memChips(sel,act,multi,all){return `<div class="chips ${act==='calF'?'one':''}">`+(all?`<span class="chip ${sel.length===0?'on':''}" data-a="${act}" data-id="">${multi?'온 가족':'전체'}</span>`:'')+members().map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="${act}" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')+`</div>`}
 const HC={};
 const LUN=new Intl.DateTimeFormat('en-u-ca-chinese',{month:'numeric',day:'numeric'});
-function lunar(d){let m=0,dd=0,leap=false;for(const p of LUN.formatToParts(d)){if(p.type==='month'){leap=/bis|윤/i.test(p.value);m=parseInt(p.value,10)}else if(p.type==='day')dd=parseInt(p.value,10)}return{m,d:dd,leap}}
+const LUNOV={'2030-02-02':[12,30],'2030-02-03':[1,1],'2030-02-04':[1,2]};/* ICU(중국 표준시) 계산이 한국 음력과 다른 날 보정 */
+function lunar(d){const ov=LUNOV[ymd(d)];if(ov)return{m:ov[0],d:ov[1],leap:false};let m=0,dd=0,leap=false;for(const p of LUN.formatToParts(d)){if(p.type==='month'){leap=/bis|윤/i.test(p.value);m=parseInt(p.value,10)}else if(p.type==='day')dd=parseInt(p.value,10)}return{m,d:dd,leap}}
 const TEMPH={'2025-01-27':'임시공휴일','2025-06-03':'대통령선거일','2026-06-03':'전국동시지방선거일'};
 function holidays(y){
   if(HC[y])return HC[y];
   const map={};const add=(ds,n,o)=>{(map[ds]=map[ds]||[]).push(Object.assign({n,hol:true},o||{}))};
   const fx=(m,d,n,sub)=>add(y+'-'+pad(m)+'-'+pad(d),n,{sub});
-  fx(1,1,'신정');fx(3,1,'삼일절',1);fx(5,5,'어린이날',1);fx(6,6,'현충일');if(y>=2026)fx(7,17,'제헌절');fx(8,15,'광복절',1);fx(10,3,'개천절',1);fx(10,9,'한글날',1);fx(12,25,'성탄절',1);
+  fx(1,1,'신정');fx(3,1,'삼일절',1);fx(5,5,'어린이날',1);fx(6,6,'현충일');if(y>=2026){fx(5,1,'노동절');fx(7,17,'제헌절')}fx(8,15,'광복절',1);fx(10,3,'개천절',1);fx(10,9,'한글날',1);fx(12,25,'성탄절',1);
   const put=(dt,n,o)=>{const x=ymd(dt);if(x.slice(0,4)===String(y))add(x,n,o)};
   for(let t=new Date(y-1,11,20);t<=new Date(y+1,0,6);t=addD(t,1)){
     const L=lunar(t);if(L.leap)continue;
@@ -534,12 +535,12 @@ function holidays(y){
   Object.keys(map).sort().forEach(ds=>{const wk=pd(ds).getDay();
     map[ds].forEach(x=>{if(x.sub&&(wk===0||wk===6||cnt(ds)>1)&&!need.some(n=>n.from===ds))need.push({from:ds,name:x.n})})});
   ['seol','chu'].forEach(g=>{const days=Object.keys(map).filter(ds=>map[ds].some(x=>x.grp===g)).sort();
-    if(days.length&&days.some(ds=>pd(ds).getDay()===0||cnt(ds)>1))need.push({from:days[days.length-1],name:g==='seol'?'설날':'추석'})});
+    if(days.length&&days.some(ds=>pd(ds).getDay()===0||(cnt(ds)>1&&!need.some(n=>n.from===ds))))need.push({from:days[days.length-1],name:g==='seol'?'설날':'추석'})});
   need.sort((a,b)=>a.from.localeCompare(b.from)).forEach(n=>{let d=addD(pd(n.from),1);
     for(let i=0;i<10;i++){const k=ymd(d),wk=d.getDay();if(wk!==0&&wk!==6&&!cnt(k))break;d=addD(d,1)}
     if(ymd(d).slice(0,4)===String(y))add(ymd(d),'대체공휴일('+n.name+')')});
   const memo=(m,d,n)=>{const k=y+'-'+pad(m)+'-'+pad(d);(map[k]=map[k]||[]).push({n,hol:false})};
-  memo(5,1,'근로자의 날');memo(5,8,'어버이날');memo(5,15,'스승의 날');
+  if(y<2026)memo(5,1,'근로자의 날');memo(5,8,'어버이날');memo(5,15,'스승의 날');
   return HC[y]=map}
 const holOf=ds=>holidays(+ds.slice(0,4))[ds]||[];
 const isHol=ds=>holOf(ds).some(x=>x.hol);
