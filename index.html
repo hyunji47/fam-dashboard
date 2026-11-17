@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data:; connect-src https://api.open-meteo.com https://geocoding-api.open-meteo.com https://open.neis.go.kr https://api.github.com https://raw.githubusercontent.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; base-uri 'none'; object-src 'none'; form-action 'none'">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -322,7 +322,12 @@ html[data-fw] *{font-weight:400!important}
 html[data-kt=unicorn] .hero.fh{overflow:visible}html[data-kt=unicorn] .hero.fh::before{border-radius:22px 22px 0 0}
 
 /* 좁은 화면: 날짜·시간 입력 겹침 방지 */
-input[type=date],input[type=time]{min-width:0;max-width:100%;box-sizing:border-box;-webkit-appearance:none;appearance:none;min-height:38px}
+input,select,textarea{font-size:16px!important}
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}
+#modal .box{overflow-x:hidden}
+input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-width:0;width:100%;max-width:100%;box-sizing:border-box;height:42px;line-height:1.2;text-align:left;-webkit-min-logical-width:0;overflow:hidden}
+input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value{text-align:left;min-height:1.2em;margin:0}
+input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{padding:0}
 .row>div[style*="flex:1"]{min-width:0}
 @media(max-width:520px){.row>div[style*="flex:1"]{flex:1 1 100%!important}}
 .sev .eico{float:right;font-size:11px;opacity:.55}
@@ -1076,6 +1081,7 @@ document.addEventListener('wheel',e=>{const h=e.target.closest('.hs,.chips.one')
 
 (function(){const mq=window.matchMedia('(min-width:900px)');let last=mq.matches;
   window.addEventListener('resize',()=>{if(mq.matches!==last){last=mq.matches;if(UI.tab==='todo'&&!modalOpen())render()}})})();
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
 </script>
 </body>
 </html>
