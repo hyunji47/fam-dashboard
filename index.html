@@ -373,7 +373,7 @@ let D=Object.assign(blank(),lsGet(K_DATA,{}));
 LISTS.forEach(l=>{if(!Array.isArray(D[l]))D[l]=[]});
 if(!D.settings)D.settings=blank().settings;
 let UI=Object.assign({tab:'home',month:TODAY().slice(0,7),sel:TODAY(),calView:'month',todoM:null,ttM:null,hM:null,mealOff:0,calF:[],color:'#2f6bff',mode:'auto',bg:'',who:'',chatDay:'',chatCal:false,chatMonth:'',ttDay:-1,mealTab:''},lsGet(K_UI,{}));
-let ME=lsGet(K_ME,null);if(UI.tab==='board')UI.tab='chat';
+let ME=lsGet(K_ME,null);if(UI.tab==='board')UI.tab='chat';UI.ttDay=-1;
 const saveUI=()=>lsSet(K_UI,UI);
 const live=l=>D[l].filter(x=>!x.del);
 const mem=id=>D.members.find(m=>m.id===id&&!m.del);
@@ -760,7 +760,7 @@ function confetti(){const e=['🎉','⭐','🌟','🎈','✨','🍭'];for(let i=
 let LASTDAY=TODAY();
 setInterval(()=>{const d=new Date(),hm=pad(d.getHours())+':'+pad(d.getMinutes());document.querySelectorAll('.hero .clk').forEach(c=>c.textContent=hm);
   if(UI.tab==='home'&&!modalOpen()&&nowSig()!==LASTSIG)render();
-  if(TODAY()!==LASTDAY){const was=UI.chatDay===LASTDAY||!UI.chatDay;LASTDAY=TODAY();if(was)UI.chatDay='';UI.sel=UI.sel===TODAY()?UI.sel:UI.sel;render()}},15000);
+  if(TODAY()!==LASTDAY){const was=UI.chatDay===LASTDAY||!UI.chatDay;LASTDAY=TODAY();UI.ttDay=-1;if(was)UI.chatDay='';UI.sel=UI.sel===TODAY()?UI.sel:UI.sel;render()}},15000);
 
 /* --- 캘린더 --- */
 function vCal(){
@@ -935,7 +935,7 @@ function memForm(m){
 
 /* ============ 이벤트 처리 ============ */
 const A={
- tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat')UI.chatCal=false;UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
+ tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat')UI.chatCal=false;if(d.id==='tt'&&UI.tab!=='tt')UI.ttDay=-1;UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
  close(){closeModal()},
  selDate(d){UI.sel=d.id;UI.month=d.id.slice(0,7);saveUI();render()},
  mon(d){const[y,m]=UI.month.split('-').map(Number);const x=new Date(y,m-1+(+d.id),1);UI.month=x.getFullYear()+'-'+pad(x.getMonth()+1);saveUI();render()},
