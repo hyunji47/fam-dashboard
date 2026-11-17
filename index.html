@@ -166,7 +166,7 @@ nav#nav button.on{background:var(--accent2);color:var(--accent)}
   .wide .rz::after{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;border-radius:2px;background:var(--line);transition:.15s}
   .wide .rz:hover::after,.wide .rz.drag::after{background:var(--accent);left:4px;width:4px}
   .wide .whead{grid-column:1/-1}
-  .wide .col{overflow-y:auto;min-height:0;padding:2px 6px 10px 2px;scrollbar-width:thin}
+  .wide .col{overflow-y:auto;min-height:0;padding:2px 6px 10px 2px}
   .wide .card{margin-bottom:14px}
   .wide .cal .d{min-height:76px}
 }
@@ -236,11 +236,8 @@ nav#nav button .i{color:inherit}
 nav#nav button .i svg .f{fill-opacity:.2}
 nav#nav button.on .i svg .f{fill-opacity:.35}
 .rz{display:none}
-*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--sub) 28%,transparent) transparent}
-*::-webkit-scrollbar{width:6px;height:6px}
-*::-webkit-scrollbar-track{background:transparent}
-*::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--sub) 25%,transparent);border-radius:6px}
-*::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--sub) 50%,transparent)}
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none;width:0;height:0}
 @media(max-width:600px){.cal .tag.hd{font-size:9.5px;height:auto;width:auto;border-radius:0;display:block;padding:0;margin:1px 0 0;background:none;color:var(--danger);line-height:1.2;font-weight:700}}
 .cal .d{position:relative}.cal .edot{display:none;position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%}
 @media(max-width:600px){.hcal .edot{display:block}.hcal .tag:not(.hd):not(.sm2){display:none}.hcal .more{display:none}.hcal .d{min-height:46px;padding-top:2px}}
@@ -922,6 +919,9 @@ if(gh())sync(false);
   document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
   document.addEventListener('dblclick',e=>{if(!e.target.closest('.rz'))return;UI.colW=null;saveUI();render()});
 })();
+
+/* 가로 스크롤 영역: 마우스 휠로 좌우 이동 */
+document.addEventListener('wheel',e=>{const h=e.target.closest('.hs,.chips.one');if(!h||h.scrollWidth<=h.clientWidth)return;if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){h.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 </script>
 </body>
 </html>
