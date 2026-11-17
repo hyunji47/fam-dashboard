@@ -22,7 +22,10 @@ h1,h2,h3{margin:0}
 .app{display:flex;min-height:100vh;min-height:100dvh}
 nav#nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:var(--card);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom));overflow-x:auto}
 nav#nav button{flex:1 0 auto;min-width:54px;border:0;background:none;padding:6px 4px;border-radius:12px;color:var(--sub);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}
-nav#nav button .i{font-size:20px;line-height:1.1}
+nav#nav button .i{line-height:0;display:block}
+nav#nav button .i svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav#nav button .i svg .f{fill:currentColor;fill-opacity:.16;stroke:none}
+nav#nav button.on .i svg .f{fill-opacity:.3}
 nav#nav button.on{color:var(--accent);background:var(--accent2);font-weight:700}
 main{flex:1;min-width:0;padding:calc(12px + env(safe-area-inset-top)) 14px calc(86px + env(safe-area-inset-bottom));max-width:1100px;margin:0 auto;width:100%}
 @media(min-width:900px){nav#nav{position:sticky;top:0;bottom:auto;height:100vh;width:128px;flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:16px 8px;gap:2px;overflow:visible}nav#nav button{flex:0 0 auto;flex-direction:row;font-size:14px;gap:10px;padding:10px 12px;justify-content:flex-start}main{padding:20px 24px 40px}.app{flex-direction:row}}
@@ -211,6 +214,20 @@ nav#nav button.on{box-shadow:0 2px 10px -2px rgba(0,0,0,.25);border:1px solid va
 .cal .d.o .n,.cal .d.o .tag{opacity:.35}
 .chatcal .cal .d{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
 .chatcal .cal .d .n{margin:0}
+@media(max-width:899px){
+.hero .row{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+.hero .clk{grid-column:2;grid-row:1;text-align:right;font-size:32px}
+.hero .row>div:first-child{grid-column:1;grid-row:1;min-width:0}
+.hero .wxs{grid-column:1;grid-row:2;margin:0;min-width:0}
+.hero .row>.btn{grid-column:2;grid-row:2;justify-self:end}
+.hero .fc2{grid-column:1/-1;grid-row:3;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.hero .fc2 div{padding:4px 2px}
+}
+.chips.one{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:4px}.chips.one::-webkit-scrollbar{display:none}.chips.one .chip{flex:0 0 auto;white-space:nowrap;padding:4px 9px;font-size:12.5px}
+.hs{position:relative;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin-top:6px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.hi2{flex:0 0 auto;min-width:96px;max-width:150px;background:var(--card2);border-radius:10px;padding:6px 9px;font-size:13px}
+.hi2.now{background:var(--accent2);border-left:4px solid var(--accent)}.hi2.now.k-academy{border-left-color:#e08a00}.hi2.now.k-etc{border-left-color:#8a8fa3}
+.hi2 .tm{font-size:11.5px;color:var(--sub);white-space:nowrap}.hi2 .ti{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hi2 .pl{font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -234,6 +251,8 @@ const addM=(d,n)=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());co
 const TODAY=()=>ymd(new Date());
 const DOW=['일','월','화','수','목','금','토'];
 const fmtK=s=>{const d=pd(s);return (d.getMonth()+1)+'월 '+d.getDate()+'일('+DOW[d.getDay()]+')'};
+const fmtY=s=>{const d=pd(s);return d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()};
+const fmtKY=s=>{const d=pd(s);return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일('+DOW[d.getDay()]+')'};
 const fmtS=s=>{const d=pd(s);return (d.getMonth()+1)+'/'+d.getDate()};
 const COLORS=['#2f6bff','#e5484d','#1f9d55','#e08a00','#9b51e0','#e5489b','#0ea5a5','#6b7385'];
 const EMOJI=['👨','👩','👦','👧','👶','🧒','👴','👵','🐶'];
@@ -332,7 +351,7 @@ const val=id=>($('#'+id)||{}).value||'';
 /* ============ 공통 조각 ============ */
 const memDot=m=>m?`<span class="dot" style="background:${esc(m.color)}"></span>`:`<span class="dot" style="background:#8a93a6"></span>`;
 const memLabel=m=>m?`${esc(m.emoji||'')} ${esc(m.name)}`:'온 가족';
-function memChips(sel,act,multi,all){return `<div class="chips">`+(all?`<span class="chip ${sel.length===0?'on':''}" data-a="${act}" data-id="">${multi?'온 가족':'전체'}</span>`:'')+members().map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="${act}" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')+`</div>`}
+function memChips(sel,act,multi,all){return `<div class="chips ${act==='calF'?'one':''}">`+(all?`<span class="chip ${sel.length===0?'on':''}" data-a="${act}" data-id="">${multi?'온 가족':'전체'}</span>`:'')+members().map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="${act}" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')+`</div>`}
 const HC={};
 const LUN=new Intl.DateTimeFormat('en-u-ca-chinese',{month:'numeric',day:'numeric'});
 function lunar(d){let m=0,dd=0,leap=false;for(const p of LUN.formatToParts(d)){if(p.type==='month'){leap=/bis|윤/i.test(p.value);m=parseInt(p.value,10)}else if(p.type==='day')dd=parseInt(p.value,10)}return{m,d:dd,leap}}
@@ -464,7 +483,8 @@ const ageM=b=>{const B=pd(b),t=new Date();return (t.getFullYear()-B.getFullYear(
 const ageTxt=b=>{if(!b)return '';const m=ageM(b);return m<24?m+'개월':Math.floor(m/12)+'세'+(m%12?' '+(m%12)+'개월':'')};
 
 /* ============ 화면 ============ */
-const TABS=[['home','🏠','한눈에'],['cal','📅','캘린더'],['todo','✅','할 일'],['chat','💬','가족 대화'],['tt','🗓️','시간표'],['meal','🍱','급식'],['health','💗','건강'],['set','⚙️','설정']];
+const I_home=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M5 11l7-6 7 6v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M3 12l9-8 9 8M10 20v-5h4v5"/></svg>`,I_cal=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="4" y="5" width="16" height="15" rx="3"/><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 3v4M16 3v4M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg>`,I_todo=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="4" y="4" width="16" height="16" rx="4"/><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.2 12.4l2.7 2.7 5-5.6"/></svg>`,I_chat=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg>`,I_tt=`<svg viewBox="0 0 24 24" aria-hidden="true"><circle class="f" cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>`,I_meal=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M4 12h16a8 8 0 0 1-16 0zM9 4.5v3M12 3.5v4M15 4.5v3"/></svg>`,I_health=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`,I_set=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h8M18 7h2M4 12h2M12 12h8M4 17h9M19 17h1"/><circle class="f" cx="15" cy="7" r="2.4"/><circle cx="15" cy="7" r="2.4"/><circle class="f" cx="9" cy="12" r="2.4"/><circle cx="9" cy="12" r="2.4"/><circle class="f" cx="16" cy="17" r="2.4"/><circle cx="16" cy="17" r="2.4"/></svg>`;
+const TABS=[['home',I_home,'홈'],['cal',I_cal,'캘린더'],['todo',I_todo,'할 일'],['chat',I_chat,'가족 대화'],['tt',I_tt,'시간표'],['meal',I_meal,'급식'],['health',I_health,'건강'],['set',I_set,'설정']];
 function renderNav(){$('#nav').innerHTML=TABS.map(t=>`<button class="${UI.tab===t[0]?'on':''}" data-a="tab" data-id="${t[0]}"><span class="i">${t[1]}</span>${t[2]}</button>`).join('')}
 function head(title,extra){return `<div class="top"><h1>${title}</h1>${extra||''}<span class="pill" id="badge"></span></div>`}
 /* SHA-256 (동기 구현) */
@@ -488,7 +508,7 @@ function render(){
   const ins=[...document.querySelectorAll('[data-enter]')],vals=ins.map(i=>i.value),act=ins.indexOf(document.activeElement);
   renderNav();const st=window.scrollY;const cs=[...document.querySelectorAll('.wide .col')].map(c=>c.scrollTop);
   const V={home:vHome,cal:vCal,todo:vTodo,chat:vChat,tt:vTT,meal:vMeal,health:vHealth,set:vSet}[UI.tab]||vHome;
-  $('#main').innerHTML=V();updateBadge();fillMeals();
+  $('#main').innerHTML=V();updateBadge();fillMeals();centerNow();LASTSIG=nowSig();
   const ins2=[...document.querySelectorAll('[data-enter]')];
   if(ins2.length===ins.length){ins2.forEach((e,i)=>{if(vals[i])e.value=vals[i]});if(act>=0&&ins2[act])ins2[act].focus()}
   window.scrollTo(0,st);document.querySelectorAll('.wide .col').forEach((c,i)=>{c.scrollTop=cs[i]||0});
@@ -521,10 +541,16 @@ function memTodoCard(m){
   const all=live('todos').filter(t=>t.member===m.id&&(!todoDone(t)||t.doneOn===TODAY()));
   const open=all.filter(t=>!todoDone(t)),done=all.filter(todoDone),total=all.length,pct=total?Math.round(done.length/total*100):0;
   return `<div class="card pc" style="--mc:${esc(m.color)}"><h2>${avatar(m,30)} ${esc(m.name)}<span class="sp"></span><span class="stars">${done.length}/${total}</span></h2>${total?`<div class="prog"><i style="width:${pct}%"></i></div>`:''}${open.map(todoRow).join('')}${done.map(todoRow).join('')}${total?'':'<div class="empty">할 일이 없어요 🎈</div>'}<div style="margin-top:6px"><input type="text" class="qa" placeholder="+ 할 일 추가 (Enter)" data-enter="quickAdd" data-m="${m.id}"></div></div>`}
+function centerNow(){
+  const hm=nowHM();document.querySelectorAll('.hs').forEach(h=>{const cs=[...h.querySelectorAll('.hi2')];if(!cs.length)return;
+    const t=h.querySelector('.hi2.now')||cs.find(c=>(c.dataset.s||'')>hm)||cs[cs.length-1];
+    h.scrollLeft=t.offsetLeft-(h.clientWidth-t.offsetWidth)/2})}
+const nowSig=()=>{const hm=nowHM(),dow=(new Date().getDay()+6)%7;return kids().map(k=>kidSched(k.id,dow).filter(e=>e.start<=hm&&hm<(e.end||'24:00')).map(e=>e.id).join('+')).join('|')};
+let LASTSIG='';
 function schoolToday(){
   const ks=kids();if(!ks.length)return '';const dow=(new Date().getDay()+6)%7,hm=nowHM();
   return `<div class="card"><h2>🎒 오늘 시간표 <span class="muted" style="font-size:12px;font-weight:400">${fmtK(TODAY())}</span></h2>`+ks.map(k=>{const es=kidSched(k.id,dow);
-    return `<div class="schk"><div>${avatar(k,26)} <b>${esc(k.name)}</b></div><div style="margin-top:4px">${es.map(e=>`<span class="per" style="${e.start<=hm&&hm<(e.end||'24:00')?'outline:2px solid var(--accent)':''}"><b class="tm">${esc(e.start)}</b>${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</span>`).join('')||`<span class="muted">${dow>4?'주말이에요 🎈':'등록된 일정이 없어요 (시간표 탭에서 추가)'}</span>`}</div></div>`}).join('')+`</div>`}
+    return `<div class="schk"><div>${avatar(k,26)} <b>${esc(k.name)}</b></div><div class="hs">${es.map(e=>`<div class="hi2 k-${e.kind||'school'} ${e.start<=hm&&hm<(e.end||'24:00')?'now':''}" data-s="${esc(e.start)}"><div class="tm">${esc(e.start)}${e.end?'~'+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')||`<span class="muted">${dow>4?'주말이에요 🎈':'등록된 일정이 없어요 (시간표 탭에서 추가)'}</span>`}</div></div>`}).join('')+`</div>`}
 function mealToday(){
   const sch=schools();if(!kids().length)return '';
   if(!sch.length)return `<div class="card"><h2>🍱 오늘 급식</h2><div class="muted">설정에서 아이의 학교를 등록하면 오늘 급식이 보여요</div></div>`;
@@ -555,7 +581,7 @@ function vHome(){
    ${schoolToday()}
    ${mealToday()}
    <div class="card"><h2>💬 가족 대화 <span class="sp"></span><button class="btn sm" data-a="tab" data-id="chat">전체 보기</button></h2><div class="chat chatbox" style="max-height:250px;overflow-y:auto;padding-right:2px">${bubbles(chatMsgs(0),false)}</div>${composeHTML()}</div>
-   ${soon.length?`<div class="card"><h2>💉 곧 챙길 건강 일정</h2>${soon.map(o=>`<div class="ev"><div class="bar" style="background:${o.over?'var(--danger)':'var(--accent)'}"></div><div><div class="t">${esc(o.name)}</div><div class="muted">${fmtS(ymd(o.s))} ~ ${fmtS(ymd(o.e))}${o.over?' · 기간 지남':''}</div></div></div>`).join('')}<div class="muted" style="margin-top:6px">참고용이에요. 정확한 일정은 소아과·예방접종도우미에서 확인하세요.</div></div>`:''}
+   ${soon.length?`<div class="card"><h2>💉 곧 챙길 건강 일정</h2>${soon.map(o=>`<div class="ev"><div class="bar" style="background:${o.over?'var(--danger)':'var(--accent)'}"></div><div><div class="t">${esc(o.name)}</div><div class="muted">${fmtY(ymd(o.s))} ~ ${fmtY(ymd(o.e))}${o.over?' · 기간 지남':''}</div></div></div>`).join('')}<div class="muted" style="margin-top:6px">참고용이에요. 정확한 일정은 소아과·예방접종도우미에서 확인하세요.</div></div>`:''}
   </div>
   <div class="col">${members().map(memTodoCard).join('')}</div></div>`}
 function calCells(y,m,f,t,sel){
@@ -570,6 +596,7 @@ function calCells(y,m,f,t,sel){
 function confetti(){const e=['🎉','⭐','🌟','🎈','✨','🍭'];for(let i=0;i<28;i++){const el=document.createElement('span');el.className='cf';el.textContent=e[i%e.length];el.style.left=Math.random()*100+'vw';el.style.animationDelay=(Math.random()*.7)+'s';el.style.fontSize=(18+Math.random()*20)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),3600)}}
 let LASTDAY=TODAY();
 setInterval(()=>{const c=$('#clk');if(c){const d=new Date();c.textContent=pad(d.getHours())+':'+pad(d.getMinutes())}
+  if(UI.tab==='home'&&!modalOpen()&&nowSig()!==LASTSIG)render();
   if(TODAY()!==LASTDAY){const was=UI.chatDay===LASTDAY||!UI.chatDay;LASTDAY=TODAY();if(was)UI.chatDay='';UI.sel=UI.sel===TODAY()?UI.sel:UI.sel;render()}},15000);
 
 /* --- 캘린더 --- */
@@ -689,14 +716,14 @@ function vHealth(){
   const young=m.birth&&ageM(m.birth)<=18*12;
   if(m.birth&&young){
     vac=VAC.map(v=>`<div class="vrow"><b>${esc(v.n)}</b><div>${v.d.map((x,i)=>{const[s,e]=vacWin(m.birth,x[0],x[1]);const key=v.k+i;const st=doseState(m.id,key,s,e);
-      return `<span class="dose ${st.st==='done'?'done':st.st==='over'?'over':st.st==='due'?'due':'fut'}" data-a="chk" data-m="${m.id}" data-k="${key}" data-lbl="${esc(v.n+' '+x[2])}" data-s="${ymd(s)}" data-e="${ymd(e)}">${esc(x[2])}<small>${st.st==='done'?'✓ '+fmtS(st.r.date):fmtS(ymd(s))+'~'+fmtS(ymd(e))}</small></span>`}).join('')}</div></div>`).join('');
+      return `<span class="dose ${st.st==='done'?'done':st.st==='over'?'over':st.st==='due'?'due':'fut'}" data-a="chk" data-m="${m.id}" data-k="${key}" data-lbl="${esc(v.n+' '+x[2])}" data-s="${ymd(s)}" data-e="${ymd(e)}">${esc(x[2])}<small>${st.st==='done'?'✓ '+fmtY(st.r.date):fmtY(ymd(s))+'~'+fmtY(ymd(e))}</small></span>`}).join('')}</div></div>`).join('');
     if(ageM(m.birth)<=72+6)chk=CHK.map(c=>{const[s,e]=winOf(m.birth,c.w[0],c.w[1],c.w[2]);const st=doseState(m.id,c.k,s,e);
-      return `<span class="dose ${st.st==='done'?'done':st.st==='over'?'over':st.st==='due'?'due':'fut'}" data-a="chk" data-m="${m.id}" data-k="${c.k}" data-lbl="${esc(c.n)}" data-s="${ymd(s)}" data-e="${ymd(e)}">${esc(c.n)}<small>${st.st==='done'?'✓ '+fmtS(st.r.date):fmtS(ymd(s))+'~'+fmtS(ymd(e))}</small></span>`}).join('')}
+      return `<span class="dose ${st.st==='done'?'done':st.st==='over'?'over':st.st==='due'?'due':'fut'}" data-a="chk" data-m="${m.id}" data-k="${c.k}" data-lbl="${esc(c.n)}" data-s="${ymd(s)}" data-e="${ymd(e)}">${esc(c.n)}<small>${st.st==='done'?'✓ '+fmtY(st.r.date):fmtY(ymd(s))+'~'+fmtY(ymd(e))}</small></span>`}).join('')}
   return head('건강 기록')+`<div class="chips">${ms.map(x=>`<span class="chip ${x.id===m.id?'on':''}" data-a="hM" data-id="${x.id}">${memDot(x)}${esc(x.name)}${x.birth?' <span class="muted">'+ageTxt(x.birth)+'</span>':''}</span>`).join('')}</div>
   <div class="grid g2"><div>
-  <div class="card"><h2>📏 최근 측정 <span class="sp"></span><button class="btn sm pri" data-a="addHealth" data-id="${m.id}">+ 기록</button></h2>${last?`<div style="font-size:18px"><b>${last.h?last.h+' cm':'–'}</b>${delta(last.h,prev&&prev.h,'cm')} &nbsp; <b>${last.w?last.w+' kg':'–'}</b>${delta(last.w,prev&&prev.w,'kg')}</div><div class="muted">${fmtK(last.date)}</div>`:'<div class="empty">키·몸무게 기록이 없어요</div>'}</div>
-  ${upc.length?`<div class="card"><h2>🏥 예정된 병원·검진</h2>${upc.map(r=>`<div class="ev" data-a="editHealth" data-id="${r.id}" style="cursor:pointer"><div class="bar" style="background:${m.color}"></div><div><div class="t">${esc(r.text)}</div><div class="muted">${fmtK(r.date)}${r.time?' '+esc(r.time):''}</div></div></div>`).join('')}<div class="muted">캘린더에도 자동으로 표시돼요</div></div>`:''}
-  <div class="card"><h2>📋 기록 <span class="sp"></span><span class="muted">${recs.length}건</span></h2>${recs.slice(0,40).map(r=>`<div class="ev" data-a="editHealth" data-id="${r.id}" style="cursor:pointer"><div class="bar" style="background:${m.color}"></div><div style="flex:1"><div class="t">${r.type==='예약'?'🏥':r.type==='진료'?'🩺':r.type==='투약'?'💊':r.type==='측정'?'📏':'📝'} ${esc(r.text||r.type)}</div><div class="muted">${fmtK(r.date)}${r.h?' · '+r.h+'cm':''}${r.w?' · '+r.w+'kg':''}${r.temp?' · '+r.temp+'℃':''}</div></div></div>`).join('')||'<div class="empty">아직 기록이 없어요</div>'}</div></div>
+  <div class="card"><h2>📏 최근 측정 <span class="sp"></span><button class="btn sm pri" data-a="addHealth" data-id="${m.id}">+ 기록</button></h2>${last?`<div style="font-size:18px"><b>${last.h?last.h+' cm':'–'}</b>${delta(last.h,prev&&prev.h,'cm')} &nbsp; <b>${last.w?last.w+' kg':'–'}</b>${delta(last.w,prev&&prev.w,'kg')}</div><div class="muted">${fmtKY(last.date)}</div>`:'<div class="empty">키·몸무게 기록이 없어요</div>'}</div>
+  ${upc.length?`<div class="card"><h2>🏥 예정된 병원·검진</h2>${upc.map(r=>`<div class="ev" data-a="editHealth" data-id="${r.id}" style="cursor:pointer"><div class="bar" style="background:${m.color}"></div><div><div class="t">${esc(r.text)}</div><div class="muted">${fmtKY(r.date)}${r.time?' '+esc(r.time):''}</div></div></div>`).join('')}<div class="muted">캘린더에도 자동으로 표시돼요</div></div>`:''}
+  <div class="card"><h2>📋 기록 <span class="sp"></span><span class="muted">${recs.length}건</span></h2>${recs.slice(0,40).map(r=>`<div class="ev" data-a="editHealth" data-id="${r.id}" style="cursor:pointer"><div class="bar" style="background:${m.color}"></div><div style="flex:1"><div class="t">${r.type==='예약'?'🏥':r.type==='진료'?'🩺':r.type==='투약'?'💊':r.type==='측정'?'📏':'📝'} ${esc(r.text||r.type)}</div><div class="muted">${fmtKY(r.date)}${r.h?' · '+r.h+'cm':''}${r.w?' · '+r.w+'kg':''}${r.temp?' · '+r.temp+'℃':''}</div></div></div>`).join('')||'<div class="empty">아직 기록이 없어요</div>'}</div></div>
   <div>${m.birth?(young?`<div class="card"><h2>💉 예방접종 <span class="sp"></span><span class="muted">${esc(m.name)} · ${ageTxt(m.birth)}</span></h2><div class="muted" style="margin-bottom:6px">칸을 누르면 접종일을 기록해요. 파랑=지금 시기, 빨강=기간 지남. 독감(매년)은 별도예요.</div>${vac}<div class="muted" style="margin-top:8px">질병관리청 표준일정을 참고용으로 계산했어요. 실제 접종은 소아과·예방접종도우미(nip.kdca.go.kr)에서 확인하세요.</div></div>
   ${chk?`<div class="card"><h2>🩺 영유아 건강검진 · 구강검진</h2>${chk}<div class="muted" style="margin-top:8px">생후 14일~71개월, 총 8차(구강 4회 별도). 기간을 넘기면 무료 검진을 못 받을 수 있어요.</div></div>`:''}`:`<div class="card"><div class="empty">${esc(m.name)}은(는) 18세 이하 접종·검진 일정 대상이 아니에요</div></div>`):`<div class="card"><div class="empty">${esc(m.name)}의 생년월일을 등록하면 예방접종·영유아검진 일정이 자동 계산돼요<br><button class="btn pri" style="margin-top:8px" data-a="editMem" data-id="${m.id}">생년월일 입력</button></div></div>`}</div></div>`}
 function healthForm(h){
@@ -807,7 +834,7 @@ const A={
    if(!o.text&&!o.h&&!o.w&&!o.temp){toast('내용이나 수치를 입력하세요');return}$('#modal').classList.remove('on');upsert('health',o);$('#box').innerHTML=''},
  delHealth(d){if(!confirm('삭제할까요?'))return;$('#modal').classList.remove('on');removeItem('health',d.id)},
  chk(d){const r=chkRec(d.m,d.k);
-   openModal(`<h2>${esc(d.lbl)}</h2><div class="muted">권장 시기 ${fmtS(d.s)} ~ ${fmtS(d.e)}</div><label class="l">접종·검진일</label><input type="date" id="f_cd" value="${r?r.date:TODAY()}"><div class="row"><button class="btn pri" style="flex:1" data-a="saveChk" data-m="${d.m}" data-k="${d.k}">${r?'날짜 수정':'완료로 기록'}</button>${r?`<button class="btn danger" data-a="unChk" data-m="${d.m}" data-k="${d.k}">기록 삭제</button>`:''}<button class="btn" data-a="close">닫기</button></div>`)},
+   openModal(`<h2>${esc(d.lbl)}</h2><div class="muted">권장 시기 ${fmtY(d.s)} ~ ${fmtY(d.e)}</div><label class="l">접종·검진일</label><input type="date" id="f_cd" value="${r?r.date:TODAY()}"><div class="row"><button class="btn pri" style="flex:1" data-a="saveChk" data-m="${d.m}" data-k="${d.k}">${r?'날짜 수정':'완료로 기록'}</button>${r?`<button class="btn danger" data-a="unChk" data-m="${d.m}" data-k="${d.k}">기록 삭제</button>`:''}<button class="btn" data-a="close">닫기</button></div>`)},
  saveChk(d){const date=val('f_cd')||TODAY();$('#modal').classList.remove('on');upsert('checks',{id:d.m+'|'+d.k,date});$('#box').innerHTML=''},
  unChk(d){$('#modal').classList.remove('on');removeItem('checks',d.m+'|'+d.k)},
  roleChg(d,el){const k=$('#kidBox');if(k)k.style.display=el.value==='child'?'block':'none'},
