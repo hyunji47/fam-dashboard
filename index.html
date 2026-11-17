@@ -264,7 +264,6 @@ html[data-kt=unicorn]{background:radial-gradient(60% 40% at 15% 0%,rgba(110,245,
 html[data-kt=unicorn] body{background:transparent}
 html[data-kt=unicorn] .card{border:1.5px solid rgba(255,255,255,.9);border-radius:22px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 html[data-kt=unicorn] .hero{position:relative;overflow:hidden}
-html[data-kt=unicorn] .hero::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,#ff8fb8,#ffd36e,#7be0b0,#7ab8ff,#b48cff)}
 html[data-kt=unicorn] .btn,html[data-kt=unicorn] .chip{border-radius:99px}
 html[data-kt=unicorn] .btn.pri{background:linear-gradient(135deg,#a78bfa,#f472b6);border-color:transparent;color:#fff}
 html[data-kt=unicorn] .top h1::before{content:'🦄 '}
@@ -320,7 +319,7 @@ html[data-fw] *{font-weight:400!important}
 @keyframes lgs{0%,100%{transform:rotate(16deg)}50%{transform:rotate(-16deg)}}
 @keyframes fbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @media(prefers-reduced-motion:reduce){.fam .lg,.fam .fp{animation:none}}
-html[data-kt=unicorn] .hero.fh{overflow:visible}html[data-kt=unicorn] .hero.fh::before{border-radius:22px 22px 0 0}
+html[data-kt=unicorn] .hero.fh{overflow:visible}
 
 /* 좁은 화면: 날짜·시간 입력 겹침 방지 */
 input,select,textarea{font-size:16px!important}
@@ -334,6 +333,13 @@ input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{
 
 /* 좁은 화면 홈: 건강 일정은 할 일 아래로 */
 @media(max-width:999px){.wide>*,.wide .card{min-width:0;max-width:100%}.wide>.col{display:contents}.wide>.col .card{margin-bottom:0}.wide .hhl{order:1}}
+
+/* 달력 일정 색: 파스텔 */
+.cal .tag.ec{background:var(--ec);color:#fff}.cal .edot.ec{background:var(--ec)}
+@supports(background:color-mix(in srgb,red,blue)){
+.cal .tag.ec{background:color-mix(in srgb,var(--ec) 22%,#fff);color:color-mix(in srgb,var(--ec) 75%,#000)}
+.cal .edot.ec{background:color-mix(in srgb,var(--ec) 55%,#fff)}
+@media(max-width:600px){.cal .tag.ec{background:color-mix(in srgb,var(--ec) 55%,#fff)}}}
 </style>
 </head>
 <body>
@@ -758,7 +764,7 @@ function calCells(y,m,f,t,sel){
   for(let i=0;i<42;i++){const d=addD(start,i),ds=ymd(d);
     if(i===35&&d.getMonth()!==m-1)break;
     const es=eventsOn(ds).filter(pass);
-    cells+=`<div class="d ${d.getMonth()!==m-1?'o':''} ${isHol(ds)?'hol':''} ${ds===t?'today':''} ${ds===sel?'sel':''} ${d.getDay()===0?'sun':d.getDay()===6?'sat':''}" data-a="selDate" data-id="${ds}"><div class="n">${d.getDate()}</div>${(()=>{const u=es.find(e=>e.src!=='hd');return u?`<i class="edot" style="background:${evColor(u)}"></i>`:''})()}${es.slice(0,3).map(e=>e.src==='hd'?`<div class="tag ${e.hol?'hd':'sm2'}">${esc(e.title)}</div>`:`<div class="tag" style="background:${evColor(e)}">${esc(e.title)}</div>`).join('')}${es.length>3?`<div class="more">+${es.length-3}</div>`:''}</div>`}
+    cells+=`<div class="d ${d.getMonth()!==m-1?'o':''} ${isHol(ds)?'hol':''} ${ds===t?'today':''} ${ds===sel?'sel':''} ${d.getDay()===0?'sun':d.getDay()===6?'sat':''}" data-a="selDate" data-id="${ds}"><div class="n">${d.getDate()}</div>${(()=>{const u=es.find(e=>e.src!=='hd');return u?`<i class="edot ec" style="--ec:${evColor(u)}"></i>`:''})()}${es.slice(0,3).map(e=>e.src==='hd'?`<div class="tag ${e.hol?'hd':'sm2'}">${esc(e.title)}</div>`:`<div class="tag ec" style="--ec:${evColor(e)}">${esc(e.title)}</div>`).join('')}${es.length>3?`<div class="more">+${es.length-3}</div>`:''}</div>`}
   return cells}
 function confetti(){const e=['🎉','⭐','🌟','🎈','✨','🍭'];for(let i=0;i<28;i++){const el=document.createElement('span');el.className='cf';el.textContent=e[i%e.length];el.style.left=Math.random()*100+'vw';el.style.animationDelay=(Math.random()*.7)+'s';el.style.fontSize=(18+Math.random()*20)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),3600)}}
 let LASTDAY=TODAY();
