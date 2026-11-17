@@ -491,7 +491,7 @@ const isHol=ds=>holOf(ds).some(x=>x.hol);
 function eventsOn(ds){
   const h=holOf(ds).map((x,i)=>({id:'hd'+ds+i,title:x.n,date:ds,members:[],src:'hd',hol:x.hol}));
   const a=live('events').filter(e=>e.date<=ds&&ds<=(e.end||e.date)).map(e=>({...e,src:'ev'}));
-  const b=live('health').filter(x=>x.type==='예약'&&x.date===ds).map(x=>({id:x.id,title:'🏥 '+x.text,date:x.date,members:[x.member],time:x.time||'',src:'hl'}));
+  const b=isKidMe()?[]:live('health').filter(x=>x.type==='예약'&&x.date===ds).map(x=>({id:x.id,title:'🏥 '+x.text,date:x.date,members:[x.member],time:x.time||'',src:'hl'}));
   return h.concat(a.concat(b).sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')))}
 const evColor=e=>{if(e.src==='hd')return e.hol?'#e5484d':'#8a93a6';const m=mem((e.members||[])[0]);return m?m.color:'#8a93a6'};
 const evWho=e=>!(e.members||[]).length?'온 가족':e.members.map(id=>mem(id)).filter(Boolean).map(m=>m.name).join(', ');
@@ -590,7 +590,7 @@ const ageTxt=b=>{if(!b)return '';const m=ageM(b);return m<24?m+'개월':Math.flo
 /* ============ 화면 ============ */
 const I_home=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M5 11l7-6 7 6v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M3 12l9-8 9 8M10 20v-5h4v5"/></svg>`,I_cal=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="4" y="5" width="16" height="15" rx="3"/><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 3v4M16 3v4M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg>`,I_todo=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="4" y="4" width="16" height="16" rx="4"/><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.2 12.4l2.7 2.7 5-5.6"/></svg>`,I_chat=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg>`,I_tt=`<svg viewBox="0 0 24 24" aria-hidden="true"><circle class="f" cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>`,I_meal=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M4 12h16a8 8 0 0 1-16 0zM9 4.5v3M12 3.5v4M15 4.5v3"/></svg>`,I_health=`<svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`,I_set=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h8M18 7h2M4 12h2M12 12h8M4 17h9M19 17h1"/><circle class="f" cx="15" cy="7" r="2.4"/><circle cx="15" cy="7" r="2.4"/><circle class="f" cx="9" cy="12" r="2.4"/><circle cx="9" cy="12" r="2.4"/><circle class="f" cx="16" cy="17" r="2.4"/><circle cx="16" cy="17" r="2.4"/></svg>`;
 const TABS=[['home',I_home,'홈'],['cal',I_cal,'달력'],['todo',I_todo,'할 일'],['chat',I_chat,'대화'],['tt',I_tt,'시간표'],['meal',I_meal,'급식'],['health',I_health,'건강'],['set',I_set,'설정']];
-function renderNav(){$('#nav').innerHTML=TABS.map(t=>`<button class="${UI.tab===t[0]?'on':''}" data-a="tab" data-id="${t[0]}"><span class="i">${t[1]}</span>${t[2]}</button>`).join('')}
+function renderNav(){$('#nav').innerHTML=TABS.filter(t=>!(isKidMe()&&t[0]==='health')).map(t=>`<button class="${UI.tab===t[0]?'on':''}" data-a="tab" data-id="${t[0]}"><span class="i">${t[1]}</span>${t[2]}</button>`).join('')}
 function head(title,extra){return `<div class="top"><h1>${title}</h1>${extra||''}<span class="pill" id="badge"></span></div>`}
 /* SHA-256 (동기 구현) */
 function sha256(str){const K=[];const H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
@@ -612,6 +612,7 @@ function render(){
   applyTheme();document.title=(D.settings.title||'').trim()||'우리집 대시보드';
   const ins=[...document.querySelectorAll('[data-enter]')],vals=ins.map(i=>i.value),act=ins.indexOf(document.activeElement);
   const oc=document.querySelector('#chatpage .chat'),ocB=!oc||oc.scrollHeight-oc.scrollTop-oc.clientHeight<40,ocT=oc?oc.scrollTop:0;
+  if(isKidMe()&&UI.tab==='health'){UI.tab='home';saveUI()}
   renderNav();const st=window.scrollY;const cs=[...document.querySelectorAll('.wide .col')].map(c=>c.scrollTop);
   const V={home:vHome,cal:vCal,todo:vTodo,chat:vChat,tt:vTT,meal:vMeal,health:vHealth,set:vSet}[UI.tab]||vHome;
   $('#main').innerHTML=V();updateBadge();fillMeals();centerNow();LASTSIG=nowSig();
@@ -622,6 +623,8 @@ function render(){
   const nc=document.querySelector('#chatpage .chat');if(nc){nc.scrollTop=(ocB||chatStick||!oc)?nc.scrollHeight:ocT;if(chatStick)window.scrollTo(0,0)}
   chatStick=false}
 function meSel(){return ME&&mem(ME)?ME:null}
+/* 이 기기에서 '나는 누구?'가 아이로 지정돼 있으면 건강·설정 일부를 숨김 */
+const isKidMe=()=>{const m=ME?mem(ME):null;return !!m&&m.role==='child'};
 
 /* --- 홈 (와이드 보드) --- */
 const PALETTE=[['#2f6bff','파랑'],['#6c5ce7','보라'],['#e5489b','분홍'],['#e5484d','빨강'],['#ff7a59','주황'],['#e0a100','노랑'],['#1f9d55','초록'],['#0ea5a5','청록'],['#3b4252','회색']];
@@ -728,7 +731,7 @@ function vHome(){
   const evs=eventsOn(t);
   const up=[];for(let i=1;i<=7;i++){const ds=ymd(addD(d,i));eventsOn(ds).forEach(e=>up.push({...e,date:ds}))}
   const notice=live('notices').sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||b.u-a.u).slice(0,3);
-  const soon=kids().flatMap(dueSoon).slice(0,4);const sch=schools();
+  const soon=isKidMe()?[]:kids().flatMap(dueSoon).slice(0,4);const sch=schools();
   const[y,m]=UI.month.split('-').map(Number);const sel=UI.sel;const selEv=eventsOn(sel);
   const cw=(UI.colW&&UI.colW.length===3?UI.colW:[1.18,1,1.05]);
   const pt=(D.settings.title||'').trim();
@@ -907,6 +910,10 @@ function healthForm(h){
 function lockView(){
   return head('설정')+`<div class="card" style="max-width:380px;margin:40px auto"><h2>🔒 설정</h2><div class="muted" style="margin:6px 0 10px">비밀번호를 입력하세요</div><input type="password" id="pwIn" placeholder="비밀번호" data-enter="pwCheck" autocomplete="off"><button class="btn pri block" data-a="pwCheck">열기</button></div>`}
 function vSet(){
+  if(isKidMe())return head('설정')+`<div class="grid g2"><div>
+  <div class="card"><h2>🎨 테마</h2>${themeBox()}</div>
+  <div class="card"><h2>🙋 나는 누구?</h2><div class="muted">이 기기에서 홈 화면에 내 할 일만 보여줘요.</div>${memChips(ME?[ME]:[],'setMe',false,false)}</div>
+  </div></div>`;
   if(D.settings.pwHash&&!UNLOCK)return lockView();
   const g=gh()||{},ms=members();
   return head('설정')+`<div class="grid g2"><div>
@@ -944,7 +951,7 @@ const A={
  calF(d){if(!d.id)UI.calF=[];else UI.calF=UI.calF.includes(d.id)?UI.calF.filter(x=>x!==d.id):[...UI.calF,d.id];saveUI();render()},
  addEv(d){evForm({date:d.date})},
  editEv(d){const e=D.events.find(x=>x.id===d.id);if(e)evForm(e)},
- goHealth(d){UI.tab='health';UI.hM=d.m;saveUI();render()},
+ goHealth(d){if(isKidMe())return;UI.tab='health';UI.hM=d.m;saveUI();render()},
  togChip(d,el){el.classList.toggle('on')},
  saveEv(d){const title=val('f_title').trim();if(!title){toast('제목을 입력하세요');return}
    const date=val('f_date')||TODAY();let end=val('f_end');if(end&&end<=date)end='';
@@ -952,7 +959,7 @@ const A={
    const o={id:d.id||uid(),title,date,end,time:val('f_time'),memo:val('f_memo').trim(),members:mems};
    $('#modal').classList.remove('on');upsert('events',o);$('#box').innerHTML=''},
  delEv(d){if(!confirm('삭제할까요?'))return;$('#modal').classList.remove('on');removeItem('events',d.id)},
- setMe(d){ME=d.id;lsSet(K_ME,ME);render()},
+ setMe(d){const t=mem(d.id);if(D.settings.pwHash&&isKidMe()&&t&&t.role!=='child'){const v=prompt('어른으로 바꾸려면 설정 비밀번호를 입력하세요');if(v===null)return;if(pwHash(v,D.settings.pwSalt||'')!==D.settings.pwHash){toast('비밀번호가 맞지 않아요');return}}ME=d.id;lsSet(K_ME,ME);render()},
  todoM(d){UI.todoM=d.id;saveUI();render()},
  addTodo(){const el=$('#newTodo');const t=el.value.trim();if(!t)return;const who=UI.todoM&&mem(UI.todoM)?UI.todoM:(meSel()||members()[0].id);upsert('todos',{id:uid(),text:t,member:who,done:false})},
  togTodo(d,el){const t=D.todos.find(x=>x.id===d.id);if(!t)return;const n={...t};if(t.repeat==='daily')n.doneOn=el.checked?TODAY():'';else{n.done=el.checked;n.doneOn=el.checked?TODAY():''}upsert('todos',n);
