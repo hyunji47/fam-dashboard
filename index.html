@@ -28,7 +28,7 @@ nav#nav button .i svg{width:23px;height:23px;fill:none;stroke:currentColor;strok
 nav#nav button .i svg .f{fill:currentColor;fill-opacity:.16;stroke:none}
 nav#nav button.on .i svg .f{fill-opacity:.3}
 nav#nav button.on{color:var(--accent);background:var(--accent2);font-weight:700}
-main{flex:1;min-width:0;padding:calc(12px + env(safe-area-inset-top)) 14px calc(86px + env(safe-area-inset-bottom));max-width:1100px;margin:0 auto;width:100%}
+main{zoom:var(--z,1);flex:1;min-width:0;padding:calc(12px + env(safe-area-inset-top)) 14px calc(86px + env(safe-area-inset-bottom));max-width:1100px;margin:0 auto;width:100%}
 @media(min-width:900px){nav#nav{position:sticky;top:0;bottom:auto;height:100vh;width:128px;flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:16px 8px;gap:2px;overflow:visible}nav#nav button{flex:0 0 auto;flex-direction:row;font-size:14px;gap:10px;padding:10px 12px;justify-content:flex-start}main{padding:20px 24px 40px}.app{flex-direction:row}}
 .top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .top h1{font-size:20px;flex:1}
@@ -151,7 +151,7 @@ nav#nav button.on{background:var(--accent2);color:var(--accent)}
 .wide .col{min-width:0}
 @media(min-width:1000px){
   main:has(.wide){max-width:none;padding:14px 18px 12px}
-  .wide{grid-template-columns:var(--c1,1.18fr) 12px var(--c2,1fr) 12px var(--c3,1.05fr);column-gap:0;row-gap:12px;grid-template-rows:auto minmax(0,1fr);height:calc(100dvh - 26px);align-items:stretch}
+  .wide{grid-template-columns:var(--c1,1.18fr) 12px var(--c2,1fr) 12px var(--c3,1.05fr);column-gap:0;row-gap:12px;grid-template-rows:auto minmax(0,1fr);height:calc(100dvh/var(--z,1) - 54px);align-items:stretch}
   .wide .rz{display:block;cursor:col-resize;position:relative;touch-action:none}
   .wide .rz::after{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;border-radius:2px;background:var(--line);transition:.15s}
   .wide .rz:hover::after,.wide .rz.drag::after{background:var(--accent);left:4px;width:4px}
@@ -268,13 +268,13 @@ html[data-kt=unicorn] .btn,html[data-kt=unicorn] .chip{border-radius:99px}
 html[data-kt=unicorn] .btn.pri{background:linear-gradient(135deg,#a78bfa,#f472b6);border-color:transparent;color:#fff}
 html[data-kt=unicorn] .top h1::before{content:'🦄 '}
 html[data-kt=unicorn] .hero .date::after{content:' 🦄'}
-#chatpage{background:none;border:0;box-shadow:none;padding:0;display:flex;flex-direction:column;height:calc(100dvh - 150px - env(safe-area-inset-bottom));min-height:360px;margin-bottom:0}
-@media(min-width:900px){#chatpage{height:calc(100dvh - 100px)}}
+#chatpage{background:none;border:0;box-shadow:none;padding:0;display:flex;flex-direction:column;height:calc(100dvh/var(--z,1) - 150px - env(safe-area-inset-bottom));min-height:360px;margin-bottom:0}
+@media(min-width:900px){#chatpage{height:calc(100dvh/var(--z,1) - 100px)}}
 #chatpage .chat{flex:1 1 auto;min-height:0;overflow-y:auto;margin-bottom:12px}
 #chatpage .chatcal{flex:0 1 auto;max-height:52%;overflow-y:auto}
 #chatpage .compose{position:static;flex:0 0 auto;margin-top:0;box-shadow:none}
 .ptitle{font-size:24px;font-weight:800;line-height:1.2;padding:2px 4px 10px;letter-spacing:-.3px;word-break:keep-all}
-@media(min-width:1000px){.wide.hast{height:calc(100dvh - 26px - 44px)}}
+@media(min-width:1000px){.wide.hast{height:calc(100dvh/var(--z,1) - 70px)}}
 
 /* 픽셀 게임 테마 (레트로 RPG 대화창 느낌) */
 :root[data-kt=pixel]{--bg:#86cf72;--card:#f8f8f0;--card2:#ece6c8;--text:#383850;--sub:#6a6a86;--line:#d3cba6;--bd:#d3cba6;--accent:#e8483f;--accent2:#ffe9a3;--shadow:0 4px 0 rgba(40,40,70,.28)}
@@ -669,6 +669,7 @@ const PALETTE=[['#2f6bff','파랑'],['#6c5ce7','보라'],['#e5489b','분홍'],['
 const BGS=[['#ffffff','흰색'],['#f3efe6','베이지'],['#eaf2ff','하늘'],['#fdeef4','분홍'],['#eaf6ee','연두'],['#f1edfb','라벤더'],['#101418','블랙'],['#13203a','네이비'],['#12302a','숲'],['#2b1a26','와인']];
 const MODES=[['auto','자동'],['light','라이트'],['dark','다크']];
 // [id, 이름, font-family, 스타일시트 URL, 굵기 있음]
+const FSIZES=[['0.9','작게'],['1','보통'],['1.12','크게'],['1.25','아주 크게']];
 const FONTS=[
 ['','기본 (시스템)','',null,1],
 ['cute','귀여운 · 주아',"'Jua'",'https://fonts.googleapis.com/css2?family=Jua&display=swap',0],
@@ -692,7 +693,8 @@ function applyFont(){const r=document.documentElement,f=FONTS.find(x=>x[0]===(UI
   if(!document.getElementById('f_'+f[0])){const l=document.createElement('link');l.id='f_'+f[0];l.rel='stylesheet';l.href=f[3];document.head.appendChild(l)}}
 const KT=[['','없음',''],['princess','공주풍','👑'],['unicorn','유니콘·오로라','🦄'],['pixel','픽셀 게임','🎮']];
 function themeBox(){const c=(UI.color||'#2f6bff').toLowerCase(),bg=(UI.bg||'').toLowerCase();
-  return `<div class="themeBox"><div class="lbl2" style="margin-top:0">어린이 테마 <span class="muted">(이 기기에만 적용)</span></div><div class="chips">${KT.map(k=>`<span class="chip ${(UI.kt||'')===k[0]?'on':''}" data-a="setKT" data-id="${k[0]}">${k[2]} ${k[1]}</span>`).join('')}</div>${UI.kt?'<div class="muted" style="margin:2px 0 8px">어린이 테마를 쓰는 동안 아래 색 설정은 적용되지 않아요</div>':''}<div class="lbl2">글꼴 <span class="muted">(이 기기에만 적용)</span></div><select data-chg="setFontSel" style="max-width:100%">${FONTS.map(f=>`<option value="${f[0]}" ${(UI.font||'')===f[0]?'selected':''}>${f[1]}</option>`).join('')}</select><div class="lbl2">테마 색 (버튼·선택·강조)</div><div class="rowsw">${PALETTE.map(p=>`<span class="sw ${c===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setColor" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${c}" data-live="liveColor" data-chg="pickColor" title="직접 고르기"></div>
+  return `<div class="themeBox"><div class="lbl2" style="margin-top:0">어린이 테마 <span class="muted">(이 기기에만 적용)</span></div><div class="chips">${KT.map(k=>`<span class="chip ${(UI.kt||'')===k[0]?'on':''}" data-a="setKT" data-id="${k[0]}">${k[2]} ${k[1]}</span>`).join('')}</div>${UI.kt?'<div class="muted" style="margin:2px 0 8px">어린이 테마를 쓰는 동안 아래 색 설정은 적용되지 않아요</div>':''}<div class="lbl2">글씨 크기 <span class="muted">(이 기기에만 적용)</span></div><select data-chg="setFS" style="max-width:100%">${FSIZES.map(f=>`<option value="${f[0]}" ${String(UI.fs||'1')===f[0]?'selected':''}>${f[1]}</option>`).join('')}</select>
+  <div class="lbl2">글꼴 <span class="muted">(이 기기에만 적용)</span></div><select data-chg="setFontSel" style="max-width:100%">${FONTS.map(f=>`<option value="${f[0]}" ${(UI.font||'')===f[0]?'selected':''}>${f[1]}</option>`).join('')}</select><div class="lbl2">테마 색 (버튼·선택·강조)</div><div class="rowsw">${PALETTE.map(p=>`<span class="sw ${c===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setColor" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${c}" data-live="liveColor" data-chg="pickColor" title="직접 고르기"></div>
   <div class="lbl2">배경색</div><div class="rowsw"><span class="sw def ${bg?'':'on'}" data-a="setBg" data-id="" title="기본">기본</span>${BGS.map(p=>`<span class="sw ${bg===p[0]?'on':''}" style="background:${p[0]}" title="${p[1]}" data-a="setBg" data-id="${p[0]}"></span>`).join('')}<input type="color" value="${bg||'#f6f7f9'}" data-live="liveBg" data-chg="pickBg" title="직접 고르기"></div>
   <div class="muted" style="margin:4px 0 8px">배경색을 고르면 밝기에 맞춰 글자색이 자동으로 바뀌어요</div>
   <div class="lbl2">화면 모드 (배경색이 기본일 때)</div><div class="chips">${MODES.map(m=>`<span class="chip ${(UI.mode||'auto')===m[0]?'on':''}" data-a="setMode" data-id="${m[0]}">${m[1]}</span>`).join('')}</div><div class="muted">이 기기에만 적용돼요</div></div>`}
@@ -700,7 +702,7 @@ const lum=h=>{const n=parseInt(h.slice(1),16);return (0.299*(n>>16&255)+0.587*(n
 function applyTheme(){
   const r=document.documentElement,st=r.style,mode=UI.mode||'auto';
   const kt=KT.some(k=>k[0]===UI.kt)?UI.kt:'';
-  applyFont();
+  applyFont();{const z=FSIZES.some(x=>x[0]===String(UI.fs))?String(UI.fs):'1';document.documentElement.style.setProperty('--z',z)}
   if(kt){r.dataset.kt=kt;r.dataset.tone='light';['--accent','--bg','--card','--card2','--line','--bd'].forEach(k=>st.removeProperty(k));return}
   delete r.dataset.kt;
   let dark=mode==='dark'||(mode==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
@@ -1032,6 +1034,7 @@ const A={
  themeOpen(){openModal(`<h2>테마</h2>${themeBox()}<div class="row" style="margin-top:12px"><button class="btn pri" style="flex:1" data-a="close">완료</button></div>`)},
  setColor(d){UI.color=d.id;saveUI();themeChanged()},
  saveTitle(){const v=val('pgTitle').trim().slice(0,30);setSettings({title:v});document.title=v||'우리집 대시보드';toast(v?'홈 타이틀을 저장했어요':'홈 타이틀을 지웠어요')},
+ setFS(d,el){UI.fs=el.value;saveUI();themeChanged()},
  setFontSel(d,el){UI.font=el.value;saveUI();themeChanged()},
  setKT(d){UI.kt=d.id;saveUI();themeChanged()},
  setBg(d){UI.bg=d.id;saveUI();themeChanged()},
