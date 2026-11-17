@@ -702,9 +702,9 @@ function schedForm(e){
 
 /* --- 급식 --- */
 function vMeal(){
-  const sch=schools();const[f,t]=weekRange(UI.mealOff);
+  const sch=schools();const curS=sch.find(x=>x.code===UI.mealTab)||sch[0]||{};const[f,t]=weekRange(UI.mealOff);
   return head('학교 급식',`<span class="pill">NEIS</span>`)+`<div class="row sp" style="margin-bottom:8px"><button class="btn" data-a="mealOff" data-id="-1">‹ 지난주</button><b>${fmtS(ymd(f))} ~ ${fmtS(ymd(t))}</b><button class="btn" data-a="mealOff" data-id="1">다음주 ›</button></div>`+
-  (sch.length?`<div class="grid g2">${sch.map(s=>`<div class="card"><h2>🏫 ${esc(s.name)}</h2><div class="muted" style="margin-bottom:6px">${esc(s.who)} · 중식</div><div data-meal='${esc(JSON.stringify({office:s.office,code:s.code,name:s.name}))}' data-off="${UI.mealOff}">불러오는 중…</div></div>`).join('')}</div><div class="muted">알레르기 번호: 1 난류 · 2 우유 · 3 메밀 · 4 땅콩 · 5 대두 · 6 밀 · 7 고등어 · 8 게 · 9 새우 · 10 돼지고기 · 11 복숭아 · 12 토마토 · 13 아황산류 · 14 호두 · 15 닭고기 · 16 쇠고기 · 17 오징어 · 18 조개류 · 19 잣</div>`:
+  (sch.length?`${sch.length>1?`<div class="chips">${sch.map(x=>`<span class="chip ${x.code===curS.code?'on':''}" data-a="mealTab" data-id="${esc(x.code)}">${esc(x.name)}</span>`).join('')}</div>`:''}<div class="card"><h2>🏫 ${esc(curS.name)}</h2><div class="muted" style="margin-bottom:6px">${esc(curS.who)} · 중식</div><div data-meal='${esc(JSON.stringify({office:curS.office,code:curS.code,name:curS.name}))}' data-off="${UI.mealOff}">불러오는 중…</div></div><div class="muted">알레르기 번호: 1 난류 · 2 우유 · 3 메밀 · 4 땅콩 · 5 대두 · 6 밀 · 7 고등어 · 8 게 · 9 새우 · 10 돼지고기 · 11 복숭아 · 12 토마토 · 13 아황산류 · 14 호두 · 15 닭고기 · 16 쇠고기 · 17 오징어 · 18 조개류 · 19 잣</div>`:
   `<div class="card"><div class="empty">아이 프로필에 학교를 등록하면 급식이 보여요.<br><button class="btn pri" style="margin-top:8px" data-a="tab" data-id="set">설정으로 가기</button></div></div>`)}
 
 /* --- 건강 --- */
