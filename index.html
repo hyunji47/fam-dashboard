@@ -330,7 +330,6 @@ input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and
 input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{padding:0}
 .row>div[style*="flex:1"]{min-width:0}
 @media(max-width:520px){.row>div[style*="flex:1"]{flex:1 1 100%!important}}
-.sev .eico{float:right;font-size:11px;opacity:.55}
 </style>
 </head>
 <body>
@@ -847,7 +846,7 @@ function vTT(){
   const today=(new Date().getDay()+6)%7;const selD=UI.ttDay>=0?UI.ttDay:today;
   const nd=all.some(x=>(x.days||[]).some(d=>d>=5))||selD>=5?7:5;const hm=nowHM();
   let cols='';for(let d=0;d<nd;d++){const es=kidSched(cur,d);
-    cols+=`<div class="sgc ${d===today?'today':''} ${d===selD?'sel':''}"><h3>${WD[d]}</h3>${es.map(e=>`<div class="sev k-${e.kind||'school'} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" data-a="editSched" data-id="${e.id}"><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''} <span class="eico">✏️</span></div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')||'<div class="muted" style="text-align:center;font-size:12px">-</div>'}</div>`}
+    cols+=`<div class="sgc ${d===today?'today':''} ${d===selD?'sel':''}"><h3>${WD[d]}</h3>${es.map(e=>`<div class="sev k-${e.kind||'school'} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" data-a="editSched" data-id="${e.id}"><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')||'<div class="muted" style="text-align:center;font-size:12px">-</div>'}</div>`}
   const legacy=ttRec(cur),hasLegacy=Object.keys(legacy.cells||{}).length&&!all.length;
   return head('시간표')+`<div class="chips">${ks.map(m=>`<span class="chip ${m.id===cur?'on':''}" data-a="ttM" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div>
   <div class="card"><div class="chips dtabs">${WD.map((w,i)=>`<span class="chip ${i===selD?'on':''}" data-a="ttDay" data-id="${i}">${w}</span>`).join('')}</div>
