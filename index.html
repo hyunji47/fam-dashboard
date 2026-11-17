@@ -363,6 +363,14 @@ input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{
 .rfbtn{flex:none;margin-top:2px;width:26px;height:26px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--sub);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
 .rfbtn:active{transform:scale(.92)}.rfbtn.spin{animation:rfspin .8s linear infinite}
 @keyframes rfspin{to{transform:rotate(360deg)}}
+
+/* 읽음·반응 */
+.bmeta{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:3px;font-size:11px;color:var(--sub)}
+.msg.me .bmeta{justify-content:flex-end}
+.rdc,.rdi,.rxb{cursor:pointer}.rdi{display:inline-flex;gap:2px;align-items:center}.rdi .av{border:1px solid var(--card)}
+.rxb{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--line);font-size:13px;line-height:1;background:var(--card)}
+.rxc{cursor:pointer;display:inline-flex;gap:2px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:0 6px;height:20px;font-size:12px;color:var(--text)}.rxc.on{border-color:var(--accent);background:var(--accent2)}
+.rxp{display:inline-flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:2px 6px;box-shadow:0 2px 8px rgba(0,0,0,.12)}.rxp span{cursor:pointer;font-size:17px;padding:0 2px}
 </style>
 </head>
 <body>
@@ -651,7 +659,7 @@ function render(){
   window.scrollTo(0,st);document.querySelectorAll('.wide .col').forEach((c,i)=>{c.scrollTop=cs[i]||0});
   document.querySelectorAll('.chatbox').forEach(b=>b.scrollTop=b.scrollHeight);
   const nc=document.querySelector('#chatpage .chat');if(nc){nc.scrollTop=(ocB||chatStick||!oc)?nc.scrollHeight:ocT;if(chatStick)window.scrollTo(0,0)}
-  chatStick=false}
+  chatStick=false;if(UI.tab==='chat')setTimeout(markRead,0)}
 function meSel(){return ME&&mem(ME)?ME:null}
 /* 이 기기에서 '나는 누구?'가 아이로 지정돼 있으면 건강·설정 일부를 숨김 */
 const isKidMe=()=>{const m=ME?mem(ME):null;return !!m&&m.role==='child'};
@@ -855,8 +863,25 @@ function bubbles(list,full){
   let out='',last='';const cur=chatWho();
   list.forEach(m=>{const day=ymd(new Date(m.t));if(full&&day!==last){last=day;out+=`<div class="dsep">${fmtK(day)}</div>`}
     const a=mem(m.by),mine=m.by===cur;
-    out+=`<div class="msg ${mine?'me':''}">${mine?'':`<div>${a?avatar(a,32):'<span class="av">?</span>'}</div>`}<div class="bw"><div class="nm">${mine?'':esc(a?a.name:'알 수 없음')+' · '}${tmk(m.t)}${m.ed?' · 수정됨':''}</div><div class="bb" data-a="editMsg" data-id="${m.id}">${esc(m.text)}</div></div></div>`});
+    out+=`<div class="msg ${mine?'me':''}">${mine?'':`<div>${a?avatar(a,32):'<span class="av">?</span>'}</div>`}<div class="bw"><div class="nm">${mine?'':esc(a?a.name:'알 수 없음')+' · '}${tmk(m.t)}${m.ed?' · 수정됨':''}</div><div class="bb" data-a="editMsg" data-id="${m.id}">${esc(m.text)}</div>${msgMeta(m)}</div></div>`});
   return out||'<div class="empty">이날은 대화가 없어요. 오늘의 첫 마디를 남겨보세요</div>'}
+
+/* 읽음 표시 · 이모티콘 반응 */
+const RXE=['❤️','✅','👍','😄','😢','😮','😡','🙏'];let RDOPEN=new Set(),RXP=null;
+const rxMe=()=>ME&&mem(ME)?ME:chatWho();
+function msgMeta(m){
+  const readers=Object.keys(m.rd||{}).filter(id=>id!==m.by&&mem(id));
+  let h='';
+  if(readers.length){h+=RDOPEN.has(m.id)?`<span class="rdi" data-a="rdTog" data-id="${m.id}" title="읽은 사람">${readers.map(id=>avatar(mem(id),16)).join('')}</span>`:`<span class="rdc" data-a="rdTog" data-id="${m.id}">읽음 ${readers.length} ›</span>`}
+  const g={};Object.entries(m.rx||{}).forEach(([id,e])=>{if(mem(id))(g[e]=g[e]||[]).push(id)});const me=rxMe();
+  const chips=Object.entries(g).map(([e,ids])=>`<span class="rxc ${ids.includes(me)?'on':''}" data-a="rxSet" data-id="${m.id}" data-e="${e}" title="${esc(ids.map(i=>mem(i).name).join(', '))}">${e}${ids.length>1?' '+ids.length:''}</span>`).join('');
+  const pick=RXP===m.id?`<span class="rxp">${RXE.map(e=>`<span data-a="rxSet" data-id="${m.id}" data-e="${e}">${e}</span>`).join('')}</span>`:'';
+  return `<div class="bmeta">${h}${chips}<span class="rxb" data-a="rxPick" data-id="${m.id}" title="반응 달기">☺</span>${pick}</div>`}
+function chatUpd(id,fn){const m=D.chat.find(x=>x.id===id);if(!m)return;const o=JSON.parse(JSON.stringify(m));fn(o);upsert('chat',o)}
+function markRead(){
+  if(UI.tab!=='chat'||!ME||!mem(ME)||modalOpen())return;
+  const ms=chatMsgs(0,chatDayOf()).filter(m=>m.by!==ME&&!(m.rd&&m.rd[ME]));if(!ms.length)return;
+  const t=Date.now();ms.forEach(m=>{m.rd=Object.assign({},m.rd,{[ME]:t});m.u=t});changed()}
 function composeHTML(){const ms=members();
   return `<div class="compose"><select id="chatWho" title="보내는 사람">${ms.map(m=>`<option value="${m.id}" ${m.id===chatWho()?'selected':''}>${esc(m.name)}</option>`).join('')}</select><textarea id="chatIn" rows="1" placeholder="메시지" data-enter="chatSend"></textarea><button class="btn pri" data-a="chatSend">보내기</button></div>`}
 function chatCalHTML(){
@@ -1026,6 +1051,9 @@ const A={
  chatToday(){UI.chatDay='';UI.chatMonth='';saveUI();chatStick=true;render()},
  chatSend(){const el=$('#chatIn');if(!el)return;const v=el.value.trim();if(!v)return;const who=val('chatWho')||chatWho();if(!who){toast('먼저 가족을 추가하세요');return}
    UI.who=who;saveUI();chatStick=UI.tab==='chat';el.value='';upsert('chat',{id:uid(),by:who,text:v,t:Date.now()})},
+ rdTog(d){RDOPEN.has(d.id)?RDOPEN.delete(d.id):RDOPEN.add(d.id);render()},
+ rxPick(d){RXP=RXP===d.id?null:d.id;render()},
+ rxSet(d){const me=rxMe();RXP=null;chatUpd(d.id,o=>{o.rx=Object.assign({},o.rx);if(o.rx[me]===d.e)delete o.rx[me];else o.rx[me]=d.e})},
  editMsg(d){const m=D.chat.find(x=>x.id===d.id);if(!m)return;const me=mem(chatWho());const own=m.by===chatWho(),canDel=own||(me&&me.role!=='child');
    if(!own&&!canDel){toast('내 메시지만 수정·삭제할 수 있어요');return}
    openModal(`<h2>메시지 ${own?'수정':'삭제'}</h2>${own?`<textarea id="f_msg">${esc(m.text)}</textarea>`:`<div class="card" style="white-space:pre-wrap">${esc(m.text)}</div>`}<div class="row">${own?`<button class="btn pri" style="flex:1" data-a="saveMsg" data-id="${m.id}">저장</button>`:''}${canDel?`<button class="btn danger" data-a="delMsg" data-id="${m.id}">삭제</button>`:''}<button class="btn" data-a="close">닫기</button></div>`)},
