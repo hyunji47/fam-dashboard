@@ -644,6 +644,12 @@ const todoDone=t=>t.repeat==='daily'?t.doneOn===TODAY():!!t.done;
 function todoRow(t){const m=mem(t.member);return `<div class="todo ${todoDone(t)?'done':''}"><input type="checkbox" ${todoDone(t)?'checked':''} data-a="togTodo" data-id="${t.id}"><div class="tx" data-a="editTodo" data-id="${t.id}">${esc(t.text)}<div class="muted">${m?memDot(m)+' '+esc(m.name)+' · ':''}${t.repeat==='daily'?'🔁 매일 ':''}${t.due?'📆 '+fmtS(t.due):''}</div></div></div>`}
 function vTodo(){
   const ms=members();if(!ms.length)return head('할 일')+'<div class="empty">설정에서 가족을 먼저 추가해 주세요</div>';
+  if(window.matchMedia('(min-width:900px)').matches){
+    return head('할 일')+`<div class="grid g2">${ms.map(m=>{const all=live('todos').filter(t=>t.member===m.id);const open=all.filter(t=>!todoDone(t)).sort((x,y)=>(x.due||'9').localeCompare(y.due||'9')),done=all.filter(todoDone);
+      return `<div class="card pc" style="--mc:${esc(m.color)}"><h2>${avatar(m,30)} ${esc(m.name)}<span class="sp"></span><span class="stars">${done.length}/${all.length}</span></h2>${all.length?`<div class="prog"><i style="width:${Math.round(done.length/all.length*100)}%"></i></div>`:''}
+      <div style="margin:6px 0"><input type="text" class="qa" placeholder="+ 할 일 추가 (Enter)" data-enter="quickAdd" data-m="${m.id}"></div>
+      ${open.map(todoRow).join('')||'<div class="empty">없어요 🎉</div>'}
+      ${done.length?`<div class="muted" style="margin:10px 0 2px;display:flex;align-items:center">완료 ${done.length}<button class="btn sm" style="margin-left:auto" data-a="clearDone" data-id="${m.id}">완료 지우기</button></div>${done.map(todoRow).join('')}`:''}</div>`}).join('')}</div>`}
   const cur=UI.todoM&&mem(UI.todoM)?UI.todoM:(meSel()||ms[0].id);
   const all=live('todos').filter(t=>t.member===cur||(cur==='*'));
   const open=all.filter(t=>!todoDone(t)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
@@ -739,9 +745,11 @@ function vHealth(){
   <div class="grid g2"><div>
   <div class="card"><h2>📏 최근 측정 <span class="sp"></span><button class="btn sm pri" data-a="addHealth" data-id="${m.id}">+ 기록</button></h2>${last?`<div style="font-size:18px"><b>${last.h?last.h+' cm':'–'}</b>${delta(last.h,prev&&prev.h,'cm')} &nbsp; <b>${last.w?last.w+' kg':'–'}</b>${delta(last.w,prev&&prev.w,'kg')}</div><div class="muted">${fmtKY(last.date)}</div>`:'<div class="empty">키·몸무게 기록이 없어요</div>'}</div>
   ${upc.length?`<div class="card"><h2>🏥 예정된 병원·검진</h2>${upc.map(r=>`<div class="ev" data-a="editHealth" data-id="${r.id}" style="cursor:pointer"><div class="bar" style="background:${m.color}"></div><div><div class="t">${esc(r.text)}</div><div class="muted">${fmtKY(r.date)}${r.time?' '+esc(r.time):''}</div></div></div>`).join('')}<div class="muted">캘린더에도 자동으로 표시돼요</div></div>`:''}
-  <div class="card"><h2>📋 기록 <span class="sp"></span><span class="muted">${recs.length}건</span></h2>${recs.slice(0,40).map(r=>`<div class="ev" data-a="editHealth" data-id="${r.id}" style="cursor:pointer"><div class="bar" style="background:${m.color}"></div><div style="flex:1"><div class="t">${r.type==='예약'?'🏥':r.type==='진료'?'🩺':r.type==='투약'?'💊':r.type==='측정'?'📏':'📝'} ${esc(r.text||r.type)}</div><div class="muted">${fmtKY(r.date)}${r.h?' · '+r.h+'cm':''}${r.w?' · '+r.w+'kg':''}${r.temp?' · '+r.temp+'℃':''}</div></div></div>`).join('')||'<div class="empty">아직 기록이 없어요</div>'}</div></div>
+  </div><div>
+  <div class="card"><h2>📋 기록 <span class="sp"></span><span class="muted">${recs.length}건</span></h2>${recs.slice(0,40).map(r=>`<div class="ev" data-a="editHealth" data-id="${r.id}" style="cursor:pointer"><div class="bar" style="background:${m.color}"></div><div style="flex:1"><div class="t">${r.type==='예약'?'🏥':r.type==='진료'?'🩺':r.type==='투약'?'💊':r.type==='측정'?'📏':'📝'} ${esc(r.text||r.type)}</div><div class="muted">${fmtKY(r.date)}${r.h?' · '+r.h+'cm':''}${r.w?' · '+r.w+'kg':''}${r.temp?' · '+r.temp+'℃':''}</div></div></div>`).join('')||'<div class="empty">아직 기록이 없어요</div>'}</div>
+  </div></div>
   <div>${m.birth?(young?`<div class="card"><h2>💉 예방접종 <span class="sp"></span><span class="muted">${esc(m.name)} · ${ageTxt(m.birth)}</span></h2><div class="muted" style="margin-bottom:6px">칸을 누르면 접종일을 기록해요. 파랑=지금 시기, 빨강=기간 지남. 독감(매년)은 별도예요.</div>${vac}<div class="muted" style="margin-top:8px">질병관리청 표준일정을 참고용으로 계산했어요. 실제 접종은 소아과·예방접종도우미(nip.kdca.go.kr)에서 확인하세요.</div></div>
-  ${chk?`<div class="card"><h2>🩺 영유아 건강검진 · 구강검진</h2>${chk}<div class="muted" style="margin-top:8px">생후 14일~71개월, 총 8차(구강 4회 별도). 기간을 넘기면 무료 검진을 못 받을 수 있어요.</div></div>`:''}`:`<div class="card"><div class="empty">${esc(m.name)}은(는) 18세 이하 접종·검진 일정 대상이 아니에요</div></div>`):`<div class="card"><div class="empty">${esc(m.name)}의 생년월일을 등록하면 예방접종·영유아검진 일정이 자동 계산돼요<br><button class="btn pri" style="margin-top:8px" data-a="editMem" data-id="${m.id}">생년월일 입력</button></div></div>`}</div></div>`}
+  ${chk?`<div class="card"><h2>🩺 영유아 건강검진 · 구강검진</h2>${chk}<div class="muted" style="margin-top:8px">생후 14일~71개월, 총 8차(구강 4회 별도). 기간을 넘기면 무료 검진을 못 받을 수 있어요.</div></div>`:''}`:`<div class="card"><div class="empty">${esc(m.name)}은(는) 18세 이하 접종·검진 일정 대상이 아니에요</div></div>`):`<div class="card"><div class="empty">${esc(m.name)}의 생년월일을 등록하면 예방접종·영유아검진 일정이 자동 계산돼요<br><button class="btn pri" style="margin-top:8px" data-a="editMem" data-id="${m.id}">생년월일 입력</button></div></div>`}</div>`}
 function healthForm(h){
   openModal(`<h2>${h.id?'기록 수정':'건강 기록'}</h2><label class="l">종류</label><select id="f_type">${['측정','진료','투약','예약','기타'].map(t=>`<option ${h.type===t?'selected':''}>${t}</option>`).join('')}</select>
   <div class="row"><div style="flex:1"><label class="l">날짜</label><input type="date" id="f_date" value="${h.date||TODAY()}"></div><div style="flex:1"><label class="l">시간(예약용)</label><input type="time" id="f_time" value="${esc(h.time||'')}"></div></div>
@@ -759,8 +767,8 @@ function vSet(){
   <div class="card"><h2>👨‍👩‍👧 가족 <span class="sp"></span><button class="btn sm pri" data-a="addMem">+ 추가</button></h2>${ms.map(m=>`<div class="ev" data-a="editMem" data-id="${m.id}" style="cursor:pointer"><div class="bar" style="background:${esc(m.color)}"></div><div><div class="t">${esc(m.emoji||'')} ${esc(m.name)} <span class="muted">${m.role==='child'?'아이':'어른'}${m.role==='child'&&m.birth?' · '+ageTxt(m.birth):''}</span></div><div class="muted">${m.role==='child'&&m.school&&m.school.name?'🏫 '+esc(m.school.name):''}</div></div></div>`).join('')||'<div class="empty">가족을 추가하세요</div>'}</div>
   <div class="card"><h2>🎨 테마</h2>${themeBox()}</div>
   <div class="card"><h2>🙋 나는 누구?</h2><div class="muted">이 기기에서 홈 화면에 내 할 일만 보여줘요.</div>${memChips(ME?[ME]:[],'setMe',false,false)}</div>
-  <div class="card"><h2>🌤️ 날씨 (기상청)</h2><div class="muted">현재: ${esc((D.settings.wx||{}).name||'')}</div><div class="row"><input type="text" id="wxq" placeholder="도시·동네 이름 (예: 수원)" style="flex:1" data-enter="wxSearch"><button class="btn" data-a="wxSearch">검색</button></div><div id="wxres"></div><div class="muted" style="margin-top:8px">기상청(KMA) 예보 모델 데이터를 사용해요.</div></div>
   </div><div>
+  <div class="card"><h2>🌤️ 날씨 (기상청)</h2><div class="muted">현재: ${esc((D.settings.wx||{}).name||'')}</div><div class="row"><input type="text" id="wxq" placeholder="도시·동네 이름 (예: 수원)" style="flex:1" data-enter="wxSearch"><button class="btn" data-a="wxSearch">검색</button></div><div id="wxres"></div><div class="muted" style="margin-top:8px">기상청(KMA) 예보 모델 데이터를 사용해요.</div></div>
   <div class="card"><div class="row sp"><div><b>🔗 GitHub 동기화</b><div class="muted">${g.owner?'연결됨 · '+esc(g.owner)+'/'+esc(g.repo):'연결 안 됨 (이 기기에만 저장)'}</div></div><button class="btn" data-a="ghOpen">설정</button></div></div>
   <div class="card"><div class="row sp"><div><b>🔒 설정 비밀번호</b><div class="muted">${D.settings.pwHash?'설정됨 · 설정 탭을 열 때 입력해요':'설정하지 않았어요'}</div></div><button class="btn" data-a="pwOpen">${D.settings.pwHash?'변경·해제':'설정'}</button></div></div>
   <div class="card"><h2>💾 백업</h2><div class="row"><button class="btn" data-a="exportData">내보내기(복사)</button><button class="btn" data-a="importData">가져오기</button></div></div>
@@ -922,6 +930,9 @@ if(gh())sync(false);
 
 /* 가로 스크롤 영역: 마우스 휠로 좌우 이동 */
 document.addEventListener('wheel',e=>{const h=e.target.closest('.hs,.chips.one');if(!h||h.scrollWidth<=h.clientWidth)return;if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){h.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
+
+(function(){const mq=window.matchMedia('(min-width:900px)');let last=mq.matches;
+  window.addEventListener('resize',()=>{if(mq.matches!==last){last=mq.matches;if(UI.tab==='todo'&&!modalOpen())render()}})})();
 </script>
 </body>
 </html>
