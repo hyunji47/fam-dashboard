@@ -60,7 +60,8 @@ label.l{font-size:12px;color:var(--sub);display:block}
 .ev .t{font-weight:600}
 .empty{color:var(--sub);text-align:center;padding:14px 0;font-size:13px}
 /* calendar */
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:0;background:var(--card);border:1px solid var(--line);border-right:0;border-bottom:0;border-radius:12px;overflow:hidden}
+.cal>*{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
 .cal .h{background:var(--card2);text-align:center;font-size:12px;padding:5px 0;color:var(--sub)}
 .cal .d{background:var(--card);min-height:62px;padding:3px 3px 2px;cursor:pointer;overflow:hidden}
 @media(min-width:760px){.cal .d{min-height:96px}}
@@ -301,7 +302,7 @@ html[data-kt=pixel] .prog i{background:#58d058;border-radius:6px;display:block;h
 html[data-kt=pixel] .bb{border:3px solid #383850;border-radius:8px}
 html[data-kt=pixel] .msg.me .bb{background:#e8483f;color:#fff}
 html[data-kt=pixel] .compose{border-color:#383850;border-width:3px;background:#ece6c8}
-html[data-kt=pixel] .cal{border:3px solid #383850;border-radius:8px}
+html[data-kt=pixel] .cal{border:3px solid #383850;border-radius:8px}html[data-kt=pixel] .cal>*:nth-child(7n){border-right:0}
 html[data-kt=pixel] .top h1::before{content:'🎮 '}
 html[data-kt=pixel] .hero .date::after{content:' 🎮'}
 /* 글꼴 */
@@ -493,7 +494,7 @@ function eventsOn(ds){
   const a=live('events').filter(e=>e.date<=ds&&ds<=(e.end||e.date)).map(e=>({...e,src:'ev'}));
   const b=isKidMe()?[]:live('health').filter(x=>x.type==='예약'&&x.date===ds).map(x=>({id:x.id,title:'🏥 '+x.text,date:x.date,members:[x.member],time:x.time||'',src:'hl'}));
   return h.concat(a.concat(b).sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')))}
-const evColor=e=>{if(e.src==='hd')return e.hol?'#e5484d':'#8a93a6';const m=mem((e.members||[])[0]);return m?m.color:'#8a93a6'};
+const evColor=e=>{if(e.src==='hd')return e.hol?'#e5484d':'#8a93a6';if(e.color)return e.color;const m=mem((e.members||[])[0]);return m?m.color:'#8a93a6'};
 const evWho=e=>!(e.members||[]).length?'온 가족':e.members.map(id=>mem(id)).filter(Boolean).map(m=>m.name).join(', ');
 function evRow(e,showDate){
   if(e.src==='hd')return `<div class="ev"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${esc(e.title)}</div><div class="muted">${showDate?fmtK(e.date)+' · ':''}${e.hol?'공휴일':'기념일'}</div></div></div>`;
@@ -785,6 +786,7 @@ function evForm(e){
   <div class="row"><div style="flex:1"><label class="l">시작일</label><input type="date" id="f_date" value="${e.date||TODAY()}"></div><div style="flex:1"><label class="l">종료일(선택)</label><input type="date" id="f_end" value="${e.end||''}"></div></div>
   <label class="l">시간(선택)</label><input type="time" id="f_time" value="${esc(e.time||'')}">
   <label class="l">대상 (선택 안 하면 온 가족)</label><div class="chips" id="f_mem">${members().map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="togChip" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div>
+  <label class="l">일정 색</label><div class="chips" id="f_ecol"><span class="chip ${!e.color?'on':''}" data-a="pickEvCol" data-id="">자동</span>${COLORS.map(c=>`<span class="chip ${e.color===c?'on':''}" data-a="pickEvCol" data-id="${c}" style="padding:4px 8px;opacity:1"><span class="dot" style="background:${c};width:16px;height:16px"></span></span>`).join('')}</div>
   <label class="l">메모</label><input type="text" id="f_memo" value="${esc(e.memo||'')}">
   <div class="row"><button class="btn pri" style="flex:1" data-a="saveEv" data-id="${e.id||''}">저장</button>${e.id?`<button class="btn danger" data-a="delEv" data-id="${e.id}">삭제</button>`:''}<button class="btn" data-a="close">닫기</button></div>`)}
 
@@ -956,7 +958,7 @@ const A={
  saveEv(d){const title=val('f_title').trim();if(!title){toast('제목을 입력하세요');return}
    const date=val('f_date')||TODAY();let end=val('f_end');if(end&&end<=date)end='';
    const mems=[...document.querySelectorAll('#f_mem .chip.on')].map(c=>c.dataset.id);
-   const o={id:d.id||uid(),title,date,end,time:val('f_time'),memo:val('f_memo').trim(),members:mems};
+   const o={id:d.id||uid(),title,date,end,time:val('f_time'),memo:val('f_memo').trim(),members:mems,color:((document.querySelector('#f_ecol .chip.on')||{dataset:{}}).dataset.id||'')};
    $('#modal').classList.remove('on');upsert('events',o);$('#box').innerHTML=''},
  delEv(d){if(!confirm('삭제할까요?'))return;$('#modal').classList.remove('on');removeItem('events',d.id)},
  setMe(d){const t=mem(d.id);if(D.settings.pwHash&&isKidMe()&&t&&t.role!=='child'){const v=prompt('어른으로 바꾸려면 설정 비밀번호를 입력하세요');if(v===null)return;if(pwHash(v,D.settings.pwSalt||'')!==D.settings.pwHash){toast('비밀번호가 맞지 않아요');return}}ME=d.id;lsSet(K_ME,ME);render()},
@@ -1020,6 +1022,7 @@ const A={
  unChk(d){$('#modal').classList.remove('on');removeItem('checks',d.m+'|'+d.k)},
  roleChg(d,el){const k=$('#kidBox');if(k)k.style.display=el.value==='child'?'block':'none'},
  addMem(){memForm()},editMem(d){const m=D.members.find(x=>x.id===d.id);if(m)memForm(m)},
+ pickEvCol(d,el){document.querySelectorAll('#f_ecol .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on')},
  pickCol(d,el){document.querySelectorAll('#f_col .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on')},
  pickEmo(d,el){document.querySelectorAll('#f_emo .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on')},
  saveMem(d){const name=val('f_name').trim();if(!name){toast('이름을 입력하세요');return}
