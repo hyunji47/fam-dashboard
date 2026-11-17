@@ -11,6 +11,7 @@
 <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1117" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>우리집 대시보드</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--card2:#f1f4f9;--text:#1d2330;--sub:#6b7385;--line:#e4e8ef;--bd:#e4e8ef;--accent:#2f6bff;--accent2:color-mix(in srgb,var(--accent) 13%,var(--card));--danger:#e5484d;--ok:#1f9d55;--warn:#d98a00;--shadow:0 1px 3px rgba(20,30,60,.06)}
@@ -240,6 +241,7 @@ nav#nav button.on .i svg .f{fill-opacity:.35}
 *::-webkit-scrollbar-track{background:transparent}
 *::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--sub) 25%,transparent);border-radius:6px}
 *::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--sub) 50%,transparent)}
+@media(max-width:600px){.cal .tag.hd{font-size:9.5px;height:auto;width:auto;border-radius:0;display:block;padding:0;margin:1px 0 0;background:none;color:var(--danger);line-height:1.2;font-weight:700}}
 </style>
 </head>
 <body>
@@ -403,7 +405,7 @@ function eventsOn(ds){
 const evColor=e=>{if(e.src==='hd')return e.hol?'#e5484d':'#8a93a6';const m=mem((e.members||[])[0]);return m?m.color:'#8a93a6'};
 const evWho=e=>!(e.members||[]).length?'온 가족':e.members.map(id=>mem(id)).filter(Boolean).map(m=>m.name).join(', ');
 function evRow(e,showDate){
-  if(e.src==='hd')return `<div class="ev"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${e.hol?'🎌':'🎀'} ${esc(e.title)}</div><div class="muted">${showDate?fmtK(e.date)+' · ':''}${e.hol?'공휴일':'기념일'}</div></div></div>`;
+  if(e.src==='hd')return `<div class="ev"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${esc(e.title)}</div><div class="muted">${showDate?fmtK(e.date)+' · ':''}${e.hol?'공휴일':'기념일'}</div></div></div>`;
   return `<div class="ev" data-a="${e.src==='hl'?'goHealth':'editEv'}" data-id="${e.id}" data-m="${esc((e.members||[])[0]||'')}" style="cursor:pointer"><div class="bar" style="background:${evColor(e)}"></div><div style="flex:1;min-width:0"><div class="t">${esc(e.title)}</div><div class="muted">${showDate?fmtK(e.date)+' · ':''}${e.time?esc(e.time)+' · ':''}${esc(evWho(e))}${e.memo?' · '+esc(e.memo):''}</div></div></div>`}
 
 /* ============ 날씨 (기상청) ============ */
