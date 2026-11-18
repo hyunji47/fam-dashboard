@@ -428,6 +428,7 @@ let D=Object.assign(blank(),lsGet(K_DATA,{}));
 LISTS.forEach(l=>{if(!Array.isArray(D[l]))D[l]=[]});
 if(!D.settings)D.settings=blank().settings;
 let UI=Object.assign({tab:'home',month:TODAY().slice(0,7),sel:TODAY(),calView:'month',todoM:null,ttM:null,hM:null,mealOff:0,calF:[],color:'#2f6bff',mode:'auto',bg:'',who:'',chatDay:'',chatCal:false,chatMonth:'',ttDay:-1,mealTab:''},lsGet(K_UI,{}));
+if(UI.sel<TODAY()){UI.sel=TODAY();UI.month=TODAY().slice(0,7)}
 let ME=lsGet(K_ME,null);if(UI.tab==='board')UI.tab='chat';UI.ttDay=-1;UI.todoM=null;
 const saveUI=()=>lsSet(K_UI,UI);
 const live=l=>D[l].filter(x=>!x.del);
@@ -830,7 +831,7 @@ function confetti(){const e=['🎉','⭐','🌟','🎈','✨','🍭'];for(let i=
 let LASTDAY=TODAY();
 setInterval(()=>{const d=new Date(),hm=pad(d.getHours())+':'+pad(d.getMinutes());document.querySelectorAll('.hero .clk').forEach(c=>c.textContent=hm);
   if(UI.tab==='home'&&!modalOpen()&&nowSig()!==LASTSIG)render();
-  if(TODAY()!==LASTDAY){const was=UI.chatDay===LASTDAY||!UI.chatDay;LASTDAY=TODAY();UI.ttDay=-1;if(was)UI.chatDay='';UI.sel=UI.sel===TODAY()?UI.sel:UI.sel;render()}},15000);
+  if(TODAY()!==LASTDAY){const was=UI.chatDay===LASTDAY||!UI.chatDay;const old=LASTDAY;LASTDAY=TODAY();UI.ttDay=-1;if(was)UI.chatDay='';if(UI.sel===old){UI.sel=TODAY();UI.month=TODAY().slice(0,7);saveUI()}render()}},15000);
 
 /* --- 캘린더 --- */
 function vCal(){
