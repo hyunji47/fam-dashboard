@@ -811,7 +811,7 @@ function vHome(){
   </div>
   <div class="rz" data-rz="0" title="드래그해서 넓이 조절 · 더블클릭하면 원래대로"></div>
   <div class="col">
-   <div class="card"><h2>💬 가족 대화 <span class="sp"></span><button class="btn sm" data-a="tab" data-id="chat">전체 보기</button></h2><div class="chat chatbox" style="max-height:250px;overflow-y:auto;padding-right:2px">${bubbles(chatMsgs(0),false)}</div></div>
+   <div class="card"><h2>💬 가족 대화 <span class="sp"></span><button class="btn sm" data-a="tab" data-id="chat">전체 보기</button></h2><div class="chat chatbox" style="max-height:250px;overflow-y:auto;padding-right:2px">${bubbles(chatMsgs(0),false)}</div>${composeHTML()}</div>
    ${schoolToday()}
    ${mealToday()}
    ${soon.length?`<div class="card hhl"><h2>💉 곧 챙길 건강 일정</h2>${soon.map(o=>`<div class="ev"><div class="bar" style="background:${o.over?'var(--danger)':'var(--accent)'}"></div><div><div class="t">${esc(o.name)}</div><div class="muted">${fmtY(ymd(o.s))} ~ ${fmtY(ymd(o.e))}${o.over?' · 기간 지남':''}</div></div></div>`).join('')}<div class="muted" style="margin-top:6px">참고용이에요. 정확한 일정은 소아과·예방접종도우미에서 확인하세요.</div></div>`:''}
