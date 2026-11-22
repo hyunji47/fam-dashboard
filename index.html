@@ -495,7 +495,7 @@ async function sync(manual){
   S.busy=false;updateBadge()}
 let pushT;function schedulePush(){if(!gh()||!gh().token)return;clearTimeout(pushT);pushT=setTimeout(()=>sync(false),2500)}
 setInterval(()=>{if(!document.hidden&&gh()&&!modalOpen())sync(false)},60000);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)UNLOCK=false;else sync(false)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)UNLOCK=false;else{if(!modalOpen()){UI.sel=TODAY();UI.month=TODAY().slice(0,7);UI.chatDay='';render()}sync(false)}});
 function updateBadge(){const b=$('#badge');if(!b)return;
   const g=gh();
   if(!g){b.className='pill';b.textContent='이 기기에만 저장'}
@@ -914,7 +914,7 @@ function msgMeta(m){
 function chatUpd(id,fn){const m=D.chat.find(x=>x.id===id);if(!m)return;const o=JSON.parse(JSON.stringify(m));fn(o);upsert('chat',o)}
 function markRead(){
   if(UI.tab!=='chat'||!ME||!mem(ME)||modalOpen())return;
-  const ms=chatMsgs(0,chatDayOf()).filter(m=>m.by!==ME&&!(m.rd&&m.rd[ME]));if(!ms.length)return;
+  const lim=Date.now()-7*864e5,vd=chatDayOf();const ms=chatAll().filter(m=>m.by!==ME&&!(m.rd&&m.rd[ME])&&(ymd(new Date(m.t))===vd||(vd===TODAY()&&m.t>=lim)));if(!ms.length)return;
   const t=Date.now();ms.forEach(m=>{m.rd=Object.assign({},m.rd,{[ME]:t});m.u=t});changed()}
 function composeHTML(){const ms=members();
   return `<div class="compose">${meSel()?`<span class="muted" style="flex:none;align-self:center;font-weight:700">${avatar(mem(meSel()),26)}</span>`:`<select id="chatWho" title="보내는 사람">${ms.map(m=>`<option value="${m.id}" ${m.id===chatWho()?'selected':''}>${esc(m.name)}</option>`).join('')}</select>`}<textarea id="chatIn" rows="1" placeholder="메시지" data-enter="chatSend"></textarea><button class="btn pri" data-a="chatSend">보내기</button></div>`}
@@ -1054,7 +1054,7 @@ function memForm(m){
 
 /* ============ 이벤트 처리 ============ */
 const A={
- tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat')UI.chatCal=false;if(d.id==='tt'&&UI.tab!=='tt')UI.ttDay=-1;if(d.id==='todo'&&UI.tab!=='todo')UI.todoM=null;UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
+ tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat')UI.chatCal=false;if(d.id==='tt'&&UI.tab!=='tt')UI.ttDay=-1;if(d.id==='todo'&&UI.tab!=='todo')UI.todoM=null;if(d.id==='cal'&&UI.tab!=='cal'){UI.sel=TODAY();UI.month=TODAY().slice(0,7)}UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
  close(){closeModal()},
  selDate(d){UI.sel=d.id;UI.month=d.id.slice(0,7);saveUI();render()},
  mon(d){const[y,m]=UI.month.split('-').map(Number);const x=new Date(y,m-1+(+d.id),1);UI.month=x.getFullYear()+'-'+pad(x.getMonth()+1);saveUI();render()},
