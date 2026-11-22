@@ -495,7 +495,7 @@ async function sync(manual){
   S.busy=false;updateBadge()}
 let pushT;function schedulePush(){if(!gh()||!gh().token)return;clearTimeout(pushT);pushT=setTimeout(()=>sync(false),2500)}
 setInterval(()=>{if(!document.hidden&&gh()&&!modalOpen())sync(false)},60000);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)UNLOCK=false;else{if(!modalOpen()){UI.sel=TODAY();UI.month=TODAY().slice(0,7);UI.chatDay='';render()}sync(false)}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)UNLOCK=false;else{if(!modalOpen()){UI.sel=TODAY();UI.month=TODAY().slice(0,7);UI.chatDay='';CHATN=3;render()}sync(false)}});
 function updateBadge(){const b=$('#badge');if(!b)return;
   const g=gh();
   if(!g){b.className='pill';b.textContent='이 기기에만 저장'}
@@ -914,7 +914,7 @@ function msgMeta(m){
 function chatUpd(id,fn){const m=D.chat.find(x=>x.id===id);if(!m)return;const o=JSON.parse(JSON.stringify(m));fn(o);upsert('chat',o)}
 function markRead(){
   if(UI.tab!=='chat'||!ME||!mem(ME)||modalOpen())return;
-  const lim=Date.now()-7*864e5,vd=chatDayOf();const ms=chatAll().filter(m=>m.by!==ME&&!(m.rd&&m.rd[ME])&&(ymd(new Date(m.t))===vd||(vd===TODAY()&&m.t>=lim)));if(!ms.length)return;
+  const lim=Date.now()-7*864e5,vis=new Set(chatVis().list.map(m=>m.id));const ms=chatAll().filter(m=>m.by!==ME&&!(m.rd&&m.rd[ME])&&(vis.has(m.id)||m.t>=lim));if(!ms.length)return;
   const t=Date.now();ms.forEach(m=>{m.rd=Object.assign({},m.rd,{[ME]:t});m.u=t});changed()}
 function composeHTML(){const ms=members();
   return `<div class="compose">${meSel()?`<span class="muted" style="flex:none;align-self:center;font-weight:700">${avatar(mem(meSel()),26)}</span>`:`<select id="chatWho" title="보내는 사람">${ms.map(m=>`<option value="${m.id}" ${m.id===chatWho()?'selected':''}>${esc(m.name)}</option>`).join('')}</select>`}<textarea id="chatIn" rows="1" placeholder="메시지" data-enter="chatSend"></textarea><button class="btn pri" data-a="chatSend">보내기</button></div>`}
@@ -924,11 +924,14 @@ function chatCalHTML(){
   for(let i=0;i<42;i++){const d=addD(start,i),ds=ymd(d);if(i===35&&d.getMonth()!==m-1)break;
     cells+=`<div class="d ${d.getMonth()!==m-1?'o':''} ${ds===t?'today':''} ${ds===sel?'sel':''} ${d.getDay()===0?'sun':d.getDay()===6?'sat':''}" data-a="chatPick" data-id="${ds}"><div class="n">${d.getDate()}</div>${cnt[ds]?`<div class="c" title="대화 ${cnt[ds]}개"></div>`:''}</div>`}
   return `<div class="chatcal" style="margin-bottom:10px"><div class="chbar"><button class="btn sm" data-a="chatMon" data-id="-1">‹</button><b>${y}년 ${m}월</b><button class="btn sm" data-a="chatMon" data-id="1">›</button></div><div class="cal">${cells}</div><div class="muted" style="margin-top:6px;font-size:12px">점이 있는 날은 대화가 있어요. 날짜를 누르면 그날의 대화를 볼 수 있어요.</div></div>`}
+let CHATN=3;
+function chatVis(){const a=chatAll();const days=[...new Set(a.map(m=>ymd(new Date(m.t))))];const keep=new Set(days.slice(-CHATN));return{list:a.filter(m=>keep.has(ymd(new Date(m.t)))),more:days.length>CHATN}}
 function vChat(){
   if(!members().length)return head('대화')+'<div class="empty">설정에서 가족을 먼저 추가해 주세요</div>';
-  const day=chatDayOf(),isT=day===TODAY();
-  const bar=`<div class="chbar"><button class="btn sm" data-a="chatDayNav" data-id="-1">‹</button><b>${isT?'오늘 · ':''}${fmtK(day)}</b><button class="btn sm" data-a="chatDayNav" data-id="1" ${isT?'disabled':''}>›</button><button class="btn sm ${UI.chatCal?'pri':''}" data-a="chatCalToggle" aria-label="달력" title="달력"><span class="i cbi">${I_cal}</span></button>${isT?'':'<button class="btn sm" data-a="chatToday">오늘</button>'}</div>`;
-  return head('대화')+`<div id="chatpage">${bar}${UI.chatCal?chatCalHTML():''}<div class="chat">${bubbles(chatMsgs(0,day),false)}</div>${isT?composeHTML():''}</div>`}
+  const v=chatVis();
+  return head('대화')+`<div id="chatpage"><div class="chat">${v.more?'<div class="dsep" data-a="chatMore" style="cursor:pointer">▲ 이전 대화 보기</div>':''}${v.list.length?bubbles(v.list,true):'<div class="empty">아직 대화가 없어요. 첫 마디를 남겨보세요</div>'}</div>${composeHTML()}</div>`}
+document.addEventListener('scroll',e=>{const el=e.target;if(!el||!el.matches||!el.matches('#chatpage .chat')||el.scrollTop>30||!chatVis().more||window.CHLOAD)return;
+  window.CHLOAD=1;const h=el.scrollHeight,t=el.scrollTop;CHATN+=3;render();const n=document.querySelector('#chatpage .chat');if(n)n.scrollTop=n.scrollHeight-h+t;setTimeout(()=>{window.CHLOAD=0},300)},true);
 
 /* --- 시간표 --- */
 function ttRec(mid){return D.tt.find(x=>x.id===mid&&!x.del)||{id:mid,n:6,cells:{}}}
@@ -1054,7 +1057,7 @@ function memForm(m){
 
 /* ============ 이벤트 처리 ============ */
 const A={
- tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat')UI.chatCal=false;if(d.id==='tt'&&UI.tab!=='tt')UI.ttDay=-1;if(d.id==='todo'&&UI.tab!=='todo')UI.todoM=null;if(d.id==='cal'&&UI.tab!=='cal'){UI.sel=TODAY();UI.month=TODAY().slice(0,7)}UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
+ tab(d){if(d.id!=='set')UNLOCK=false;if(d.id==='chat'&&UI.tab!=='chat'){UI.chatCal=false;CHATN=3}if(d.id==='tt'&&UI.tab!=='tt')UI.ttDay=-1;if(d.id==='todo'&&UI.tab!=='todo')UI.todoM=null;if(d.id==='cal'&&UI.tab!=='cal'){UI.sel=TODAY();UI.month=TODAY().slice(0,7)}UI.tab=d.id;saveUI();chatStick=d.id==='chat';render();if(!chatStick)window.scrollTo(0,0);if(UI.tab==='home')loadWx()},
  close(){closeModal()},
  selDate(d){UI.sel=d.id;UI.month=d.id.slice(0,7);saveUI();render()},
  mon(d){const[y,m]=UI.month.split('-').map(Number);const x=new Date(y,m-1+(+d.id),1);UI.month=x.getFullYear()+'-'+pad(x.getMonth()+1);saveUI();render()},
@@ -1095,6 +1098,7 @@ const A={
  saveTodo(d){{const x=D.todos.find(y=>y.id===d.id);if(x&&!canT(x.member))return}const t=D.todos.find(x=>x.id===d.id);if(!t)return;$('#modal').classList.remove('on');upsert('todos',{...t,text:val('f_text').trim()||t.text,member:val('f_who'),due:val('f_due'),repeat:val('f_rep')});$('#box').innerHTML=''},
  delTodo(d){{const x=D.todos.find(y=>y.id===d.id);if(x&&!canT(x.member))return}$('#modal').classList.remove('on');removeItem('todos',d.id)},
  clearDone(d){if(!canT(d.id))return;D.todos.filter(t=>t.member===d.id&&!t.del&&todoDone(t)&&t.repeat!=='daily').forEach(t=>{t.del=true;t.u=Date.now()});changed()},
+ chatMore(){const el=document.querySelector('#chatpage .chat');const h=el?el.scrollHeight:0,t=el?el.scrollTop:0;CHATN+=3;render();const n=document.querySelector('#chatpage .chat');if(n)n.scrollTop=n.scrollHeight-h+t},
  chatCalToggle(){UI.chatCal=!UI.chatCal;UI.chatMonth=chatDayOf().slice(0,7);saveUI();render()},
  chatMon(d){const[y,m]=(UI.chatMonth||chatDayOf().slice(0,7)).split('-').map(Number);const n=new Date(y,m-1+(+d.id),1);UI.chatMonth=n.getFullYear()+'-'+pad(n.getMonth()+1);saveUI();render()},
  chatPick(d){UI.chatDay=d.id===TODAY()?'':d.id;saveUI();chatStick=true;render()},
