@@ -1019,7 +1019,9 @@ function ttBlocks(cid,d,H0,HH,hm,today){
 function ttAxis(H0,H1,HH){return `<div class="tgl"><div class="sp"></div><div class="tgx" style="height:${(H1-H0)*HH}px">${Array.from({length:H1-H0},(_,k)=>`<div class="hl" style="top:${k*HH}px">${String(H0+k).padStart(2,'0')}:00</div>`).join('')}</div></div>`}
 function ttTopBtn(){return isKidMe()?'':`<button class="btn sm" data-a="ttCost" style="margin-left:auto">시간표짜기</button>`}
 function vTT(){
-  if(UI.ttView==='cost'&&!isKidMe())return vTTCost();
+  if(UI.ttView==='cost'&&!isKidMe()){UI.ttView='';const m=vTTMain();UI.ttView='cost';return m.replace('<h1>시간표</h1>','<h1>시간표짜기</h1>').replace(ttTopBtn(),'<button class="btn sm" data-a="ttBack" style="margin-left:auto">‹ 시간표</button>')+vTTCost()}
+  return vTTMain()}
+function vTTMain(){
   const ks=kids();if(!ks.length)return head('시간표',ttTopBtn())+'<div class="empty">시간표는 "아이"로 등록한 가족만 사용해요.<br>설정에서 구분을 "아이"로 지정해 주세요</div>';
   const today=(new Date().getDay()+6)%7;const selD=UI.ttDay>=0?UI.ttDay:today;const hm=nowHM();const HH=64;
   const dtabs=`<div class="chips dtabs">${WD.map((w,i)=>`<span class="chip ${i===selD?'on':''}" data-a="ttDay" data-id="${i}">${w}</span>`).join('')}</div>`;
@@ -1062,7 +1064,7 @@ function vTTCost(){
     return `<tr class="pvadd"><td>추가됨</td><td>${esc((mem(a.member)||{}).name||'')}</td><td>${esc(a.name)}${a.unit==='session'?` (주 ${a.times}회)`:''}</td><td class="r">${won(m)}</td><td class="r"><button class="btn sm danger" data-a="pvRm" data-id="${a.id}">취소</button></td></tr>`}).join('');
   const diff=sim-base;
   const sty='<style>.ttc table{width:100%;border-collapse:collapse;font-size:14px}.ttc th,.ttc td{padding:7px 5px;border-bottom:1px solid var(--line,#eee);text-align:left}.ttc .r{text-align:right;font-variant-numeric:tabular-nums}.ttc .sum{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.ttc .sum>div{border:1px solid var(--line,#eee);border-radius:10px;padding:8px 12px;min-width:120px}.ttc .sum b{display:block;font-size:17px}.ttc tr.pvoff td{color:#aaa;text-decoration:line-through}.ttc tr.pvadd td{background:rgba(60,170,100,.1)}.ttc .pvf{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:8px}.ttc .pvf label{font-size:12px;display:flex;flex-direction:column;gap:3px}.ttc .pvf input,.ttc .pvf select{min-width:0}.ttc tr.rw{cursor:pointer}</style>';
-  return head('비용 확인','<button class="btn sm" data-a="ttBack" style="margin-left:auto">‹ 시간표</button>')+sty+`<div class="ttc">
+  return sty+`<div class="ttc">
   <div class="card"><h2>💰 비용 확인</h2>
    <div class="sum"><div><span class="muted">월 총 비용</span><b>${won(tot)}</b></div>${ks.map(k=>`<div><span class="muted">${esc(k.name)}</span><b>${won(per[k.id]||0)}</b></div>`).join('')}</div>
    <table><thead><tr><th>아이</th><th>일정</th><th>요일</th><th>입력 비용</th><th class="r">월 환산</th></tr></thead><tbody>${rows.map(e=>`<tr class="rw" data-a="editSched" data-id="${e.id}"><td>${esc((mem(e.member)||{}).name||'')}</td><td>${(KIND[e.kind]||KIND.etc)[0]} ${esc(e.title)}</td><td>${dayTxt(e)}</td><td>${e.cost?won(e.cost)+' / '+unitTxt(e):'<span class="muted">미입력</span>'}</td><td class="r">${won(schedMonthly(e))}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">방과후·학원·기타 일정이 없어요</td></tr>'}</tbody></table>
