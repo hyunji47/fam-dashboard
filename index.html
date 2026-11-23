@@ -179,8 +179,8 @@ nav#nav button.on{background:var(--accent2);color:var(--accent)}
 .bw{max-width:78%;min-width:0}
 .msg.me .bw{text-align:right}
 .nm{font-size:11px;color:var(--sub);margin:0 4px 2px}
-.bb{display:inline-block;text-align:left;background:var(--card2);padding:8px 12px;border-radius:16px 16px 16px 4px;white-space:pre-wrap;word-break:break-word;cursor:pointer}
-.msg.me .bb{background:var(--accent);color:#fff;border-radius:16px 16px 4px 16px}
+.bb{display:inline-block;text-align:left;background:var(--card);border:1px solid var(--line);padding:8px 12px;border-radius:16px 16px 16px 4px;white-space:pre-wrap;word-break:break-word;cursor:pointer}
+.msg.me .bb{background:var(--accent);border-color:transparent;color:#fff;border-radius:16px 16px 4px 16px}
 .dsep{text-align:center;font-size:12px;color:var(--sub);margin:6px 0}
 .compose{display:flex;gap:6px;align-items:flex-end;margin-top:10px;background:var(--card2);border:2px solid var(--accent);border-radius:16px;padding:8px}
 .compose select{width:auto;margin:0;padding:8px 6px;max-width:30%}
@@ -255,6 +255,7 @@ nav#nav button.on .i svg .f{fill-opacity:.35}
 .mgrid .meal b{padding-bottom:4px;margin-bottom:4px;border-bottom:1px dashed var(--line)}
 .dish{font-size:13px;line-height:1.45}
 #chatpage .chat{margin-bottom:18px}
+#chatpage{max-width:800px;margin-left:auto;margin-right:auto;width:100%}
 /* ===== 어린이 테마 ===== */
 :root[data-kt=princess]{--bg:#fff1f7;--card:#ffffff;--card2:#ffe6f1;--text:#5b2a45;--sub:#a0708a;--line:#f7c6dc;--bd:#f7c6dc;--accent:#e0559a;--shadow:0 4px 14px rgba(224,85,154,.18)}
 html[data-kt=princess]{background:#fff1f7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='%23f7b6d2'%3E%3Cpath d='M20 14l2 6 6 2-6 2-2 6-2-6-6-2 6-2z'/%3E%3Cpath d='M86 70l1.6 4.4 4.4 1.6-4.4 1.6L86 82l-1.6-4.4L80 76l4.4-1.6z' fill='%23f5c451'/%3E%3Ccircle cx='70' cy='20' r='2'/%3E%3Ccircle cx='28' cy='88' r='2.4' fill='%23f5c451'/%3E%3C/g%3E%3C/svg%3E")}
@@ -305,7 +306,7 @@ html[data-kt=pixel] input,html[data-kt=pixel] select,html[data-kt=pixel] textare
 html[data-kt=pixel] .prog{background:#ddd8c0;border:2px solid #383850;border-radius:8px;padding:1px;height:12px}
 html[data-kt=pixel] .prog i{background:#58d058;border-radius:6px;display:block;height:100%}
 html[data-kt=pixel] .bb{border:3px solid #383850;border-radius:8px}
-html[data-kt=pixel] .msg.me .bb{background:#e8483f;color:#fff}
+html[data-kt=pixel] .msg.me .bb{border-color:#383850;background:#e8483f;color:#fff}
 html[data-kt=pixel] .compose{border-color:#383850;border-width:3px;background:#ece6c8}
 html[data-kt=pixel] .cal{border:3px solid #383850;border-radius:8px}html[data-kt=pixel] .cal>*:nth-child(7n){border-right:0}
 html[data-kt=pixel] .top h1::before{content:'🎮 '}
