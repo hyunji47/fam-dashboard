@@ -352,6 +352,14 @@ input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{
 .sg.tg{grid-template-columns:40px repeat(var(--nd,5),1fr);gap:0 6px}
 .tgl .sp{height:28px}.tgx{position:relative}.tgx .hl{position:absolute;right:4px;font-size:11px;line-height:14px;height:14px;color:var(--sub);transform:translateY(-7px);white-space:nowrap}
 .sgc h3{height:22px;line-height:16px;margin:0 0 6px}
+.tgb .sev[data-sid]{cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-action:manipulation;-webkit-touch-callout:none}
+.tgb .sev.dragging{z-index:30;cursor:grabbing;box-shadow:0 8px 22px rgba(0,0,0,.28);opacity:.92;transition:none}
+.tgb .sev .rsz{position:absolute;left:0;right:0;bottom:0;height:12px;cursor:ns-resize;touch-action:none}
+.tgb .sev .rsz::after{content:"";position:absolute;left:50%;bottom:3px;width:22px;height:3px;margin-left:-11px;border-radius:2px;background:currentColor;opacity:.35}
+.sgc.dropcol{background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:8px}
+#ttTrash{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));z-index:60;padding:12px 20px;border-radius:14px;background:var(--card);border:2px dashed var(--danger);color:var(--danger);font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+#ttTrash.hot{background:var(--danger);color:#fff}
+@media(min-width:900px){#ttTrash{bottom:30px}}
 .tgb .gm{position:absolute;left:0;right:0;height:2px;background:var(--card);pointer-events:none}
 .tgb{position:relative;background-image:linear-gradient(color-mix(in srgb,var(--line) 45%,var(--card)) 1px,transparent 1px);background-size:100% 64px;border-top:1px solid color-mix(in srgb,var(--line) 45%,var(--card))}
 .tgb .sev{position:absolute;margin:0;padding:3px 6px;overflow:hidden;box-sizing:border-box;font-size:12.5px;line-height:1.3}
@@ -673,7 +681,7 @@ const pwHash=(pw,salt)=>sha256(salt+':'+pw);
 let UNLOCK=false;
 let chatStick=false;
 function render(){
-  if(modalOpen())return;
+  if(modalOpen()||window.TTDRAG)return;
   applyTheme();document.title=(D.settings.title||'').trim()||'우리집 대시보드';
   const ins=[...document.querySelectorAll('[data-enter]')],vals=ins.map(i=>i.value),act=ins.indexOf(document.activeElement);
   const oc=document.querySelector('#chatpage .chat'),ocB=!oc||oc.scrollHeight-oc.scrollTop-oc.clientHeight<40,ocT=oc?oc.scrollTop:0;
@@ -946,7 +954,68 @@ function ttBlocks(cid,d,H0,HH,hm,today){
   const it=kidSched(cid,d).map(e=>({e,s:ttMin(e.start),f:Math.max(ttMin(e.end)||ttMin(e.start)+50,ttMin(e.start)+40),l:0,n:1}));
   it.forEach((a,x)=>{const used=new Set();it.forEach((b,y)=>{if(y<x&&b.s<a.f&&a.s<b.f)used.add(b.l)});let l=0;while(used.has(l))l++;a.l=l});
   it.forEach(a=>{let n=a.l+1;it.forEach(b=>{if(b.s<a.f&&a.s<b.f)n=Math.max(n,b.l+1)});a.n=n});
-  return it.map(({e,s:st,f,l,n})=>`${st%60===0?`<i class="gm" style="top:${(st-H0*60)/60*HH-1}px"></i>`:''}${f%60===0?`<i class="gm" style="top:${(f-H0*60)/60*HH-1}px"></i>`:''}<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)"${isKidMe()?'':` data-a="editSched" data-id="${e.id}"`}><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}</div>`).join('')}
+  return it.map(({e,s:st,f,l,n})=>`${st%60===0?`<i class="gm" style="top:${(st-H0*60)/60*HH-1}px"></i>`:''}${f%60===0?`<i class="gm" style="top:${(f-H0*60)/60*HH-1}px"></i>`:''}<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)"${isKidMe()?'':` data-a="editSched" data-id="${e.id}" data-sid="${e.id}"`}><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}${isKidMe()?'':'<i class="rsz"></i>'}</div>`).join('')}
+/* --- 시간표 드래그: 길이 조절 · 시간/요일/아이 이동 · 삭제 --- */
+(function(){
+  const HH=64,SNAP=5;let S=null,LAST=0;
+  const hm2=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+  const sn=px=>Math.round(px*60/HH/SNAP)*SNAP;
+  const colAt=x=>[...document.querySelectorAll('.tgb')].find(g=>{const r=g.getBoundingClientRect();return r.width>0&&x>=r.left&&x<r.right});
+  const overTrash=(x,y)=>{const t=document.getElementById('ttTrash');if(!t)return false;const r=t.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom};
+  function begin(){S.active=true;window.TTDRAG=1;S.el.classList.add('dragging');
+    if(S.mode==='mv'){const t=document.createElement('div');t.id='ttTrash';t.textContent='🗑 여기로 끌어 놓으면 삭제';document.body.appendChild(t)}
+    if(navigator.vibrate)try{navigator.vibrate(15)}catch(_){}}
+  function clear(){if(S&&S.timer)clearTimeout(S.timer);const t=document.getElementById('ttTrash');if(t)t.remove();document.querySelectorAll('.dropcol').forEach(c=>c.classList.remove('dropcol'));S=null;window.TTDRAG=0}
+  document.addEventListener('pointerdown',e=>{
+    if(S||isKidMe()||(e.pointerType==='mouse'&&e.button!==0))return;
+    const bl=e.target.closest&&e.target.closest('.sev[data-sid]');if(!bl)return;
+    const it=D.sched.find(x=>x.id===bl.dataset.sid&&!x.del);if(!it)return;const g=bl.closest('.tgb');if(!g)return;
+    const s0=ttMin(it.start),e0=ttMin(it.end)||0,f0=Math.max(e0||s0+50,s0+40);
+    S={el:bl,it,mode:e.target.closest('.rsz')?'rs':'mv',x0:e.clientX,y0:e.clientY,g,day:+g.dataset.d,mem:g.dataset.m,s0,e0,f0,touch:e.pointerType==='touch',active:false,dm:0,tg:g,trash:false};
+    if(S.touch&&S.mode==='mv')S.timer=setTimeout(()=>{if(S&&!S.active)begin()},350);
+  });
+  document.addEventListener('pointermove',e=>{
+    if(!S)return;const dx=e.clientX-S.x0,dy=e.clientY-S.y0,d=Math.hypot(dx,dy);
+    if(!S.active){
+      if(S.touch&&S.mode==='mv'){if(d>8){clearTimeout(S.timer);S=null}return}
+      if(d>(S.mode==='rs'?3:6))begin();else return}
+    e.preventDefault();
+    const dm=sn(dy);
+    if(S.mode==='rs'){
+      const nf=Math.min(24*60,Math.max(S.s0+40,S.f0+dm));S.nf=nf;
+      S.el.style.height=((nf-S.s0)*HH/60-2)+'px';S.el.querySelector('.tm').textContent=hm2(S.s0)+' ~ '+hm2(nf);return}
+    const dur=S.e0?S.e0-S.s0:0,span=Math.max(dur,0);
+    const ns=Math.min(24*60-Math.max(span,40),Math.max(0,S.s0+dm));S.ns=ns;
+    S.el.style.transform=`translate(${dx}px,${(ns-S.s0)*HH/60}px)`;
+    S.el.querySelector('.tm').textContent=hm2(ns)+(dur?' ~ '+hm2(ns+dur):'');
+    S.trash=overTrash(e.clientX,e.clientY);const tr=document.getElementById('ttTrash');if(tr)tr.classList.toggle('hot',S.trash);
+    const tg=colAt(e.clientX);S.tg=tg||S.g;document.querySelectorAll('.dropcol').forEach(c=>c.classList.remove('dropcol'));
+    if(tg&&tg!==S.g&&!S.trash)tg.parentElement.classList.add('dropcol')});
+  document.addEventListener('touchmove',e=>{if(S&&S.active&&e.cancelable)e.preventDefault()},{passive:false});
+  function finish(e,cancel){
+    if(!S)return;const st=S;
+    if(!st.active){clear();return}
+    LAST=Date.now();clear();
+    const o=JSON.parse(JSON.stringify(st.it));let ch=false;
+    if(!cancel){
+      if(st.mode==='rs'){if(st.nf&&st.nf!==st.f0){o.end=hm2(st.nf);ch=true}}
+      else if(st.trash){render();confirmDel(st.it);return}
+      else{
+        const ns=st.ns==null?st.s0:st.ns,dur=st.e0?st.e0-st.s0:0;
+        if(ns!==st.s0){o.start=hm2(ns);if(dur)o.end=hm2(ns+dur);ch=true}
+        const tg=st.tg;
+        if(tg&&tg!==st.g){
+          if(tg.dataset.m!==st.mem){o.member=tg.dataset.m;ch=true}
+          else if(+tg.dataset.d!==st.day){const nd=+tg.dataset.d;o.days=[...new Set((o.days||[]).map(x=>x===st.day?nd:x))].sort();ch=true}}
+      }
+    }
+    if(ch)upsert('sched',o);else render()}
+  document.addEventListener('pointerup',e=>finish(e,false));
+  document.addEventListener('pointercancel',e=>finish(e,true));
+  document.addEventListener('click',e=>{if(Date.now()-LAST<200){e.stopPropagation();e.preventDefault()}},true);
+  document.addEventListener('contextmenu',e=>{if(S&&S.active)e.preventDefault()});
+  function confirmDel(it){openModal(`<h2>일정을 삭제할까요?</h2><div style="margin:8px 0 14px"><b>${esc(it.title)}</b><div class="muted">${esc(it.start||'')}${it.end?' ~ '+esc(it.end):''}</div></div><div class="row"><button class="btn danger" style="flex:1" data-a="delSchedYes" data-id="${it.id}">삭제</button><button class="btn" data-a="close">취소</button></div>`)}
+})();
 function ttAxis(H0,H1,HH){return `<div class="tgl"><div class="sp"></div><div class="tgx" style="height:${(H1-H0)*HH}px">${Array.from({length:H1-H0},(_,k)=>`<div class="hl" style="top:${k*HH}px">${String(H0+k).padStart(2,'0')}:00</div>`).join('')}</div></div>`}
 function vTT(){
   const ks=kids();if(!ks.length)return head('시간표')+'<div class="empty">시간표는 "아이"로 등록한 가족만 사용해요.<br>설정에서 구분을 "아이"로 지정해 주세요</div>';
@@ -957,7 +1026,7 @@ function vTT(){
     let sel=(UI.ttSel||[]).filter(id=>ks.some(k=>k.id===id)).slice(0,2);if(!sel.length)sel=ks.slice(0,2).map(k=>k.id);
     const all=sel.flatMap(id=>kidSched(id,selD));let lo=9*60,hi=17*60;all.forEach(e=>{lo=Math.min(lo,ttMin(e.start));hi=Math.max(hi,ttMin(e.end)||ttMin(e.start)+50)});
     const H0=Math.max(0,Math.floor(lo/60)),H1=Math.min(24,Math.ceil(hi/60));
-    const cols=sel.map(id=>{const m=mem(id);return `<div class="sgc mkc ${d_cls(selD,today)}"><div class="mkh">${avatar(m,22)}<b>${esc(m.name)}</b></div><div class="tgb" style="height:${(H1-H0)*HH}px">${ttBlocks(id,selD,H0,HH,hm,today)}</div></div>`}).join('');
+    const cols=sel.map(id=>{const m=mem(id);return `<div class="sgc mkc ${d_cls(selD,today)}"><div class="mkh">${avatar(m,22)}<b>${esc(m.name)}</b></div><div class="tgb" data-h0="${H0}" data-d="${selD}" data-m="${id}" style="height:${(H1-H0)*HH}px">${ttBlocks(id,selD,H0,HH,hm,today)}</div></div>`}).join('');
     return head('시간표')+(ks.length>2?`<div class="chips">${ks.map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="ttPick" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div><div class="muted" style="margin:-4px 0 8px">두 명까지 함께 볼 수 있어요</div>`:'')+
     `<div class="card">${dtabs}<div class="sg tg mk">${ttAxis(H0,H1,HH)}${cols}</div>
     ${isKidMe()?'':`<div class="row" style="margin-top:10px">${sel.map(id=>`<button class="btn pri sm" data-a="addSched" data-id="${id}" data-d="${selD}">+ ${esc(mem(id).name)}</button>`).join('')}<span class="muted">일정을 누르면 수정·삭제할 수 있어요</span></div>`}</div>`}
@@ -966,7 +1035,7 @@ function vTT(){
   let lo=9*60,hi=17*60;all.forEach(e=>{lo=Math.min(lo,ttMin(e.start));hi=Math.max(hi,ttMin(e.end)||ttMin(e.start)+50)});
   const H0=Math.max(0,Math.floor(lo/60)),H1=Math.min(24,Math.ceil(hi/60));
   let cols=ttAxis(H0,H1,HH);for(let d=0;d<nd;d++){
-    cols+=`<div class="sgc ${d===today?'today':''} ${d===selD?'sel':''}"><h3>${WD[d]}</h3><div class="tgb" style="height:${(H1-H0)*HH}px">${ttBlocks(cur,d,H0,HH,hm,today)}</div></div>`}
+    cols+=`<div class="sgc ${d===today?'today':''} ${d===selD?'sel':''}"><h3>${WD[d]}</h3><div class="tgb" data-h0="${H0}" data-d="${d}" data-m="${cur}" style="height:${(H1-H0)*HH}px">${ttBlocks(cur,d,H0,HH,hm,today)}</div></div>`}
   const legacy=ttRec(cur),hasLegacy=Object.keys(legacy.cells||{}).length&&!all.length;
   return head('시간표')+`<div class="chips">${ks.map(m=>`<span class="chip ${m.id===cur?'on':''}" data-a="ttM" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div>
   <div class="card">${dtabs}
@@ -1125,6 +1194,7 @@ const A={
    const start=val('f_s'),end=val('f_e');if(!start){toast('시작 시간을 입력하세요');return}if(end&&end<=start){toast('끝 시간이 시작보다 늦어야 해요');return}
    const o={id:d.id||uid(),member:d.m,title,kind:val('f_k')||'school',days,start,end,place:val('f_p').trim(),color:((document.querySelector('#f_scol .chip.on')||{dataset:{}}).dataset.id||'')};
    $('#modal').classList.remove('on');upsert('sched',o);$('#box').innerHTML=''},
+ delSchedYes(d){if(isKidMe())return;$('#modal').classList.remove('on');$('#box').innerHTML='';removeItem('sched',d.id)},
  delSched(d,el){if(isKidMe())return;if(!el.dataset.sure){el.dataset.sure='1';el.textContent='한 번 더 누르면 삭제';return}$('#modal').classList.remove('on');removeItem('sched',d.id)},
  impTT(d){if(isKidMe())return;const r=ttRec(d.id);const to=m=>pad(Math.floor(m/60))+':'+pad(m%60);let n=0;
    for(let p=1;p<=r.n;p++){const st=540+(p-1)*50;const by={};for(let dd=0;dd<5;dd++){const c=r.cells[dd+'-'+p];if(c)(by[c]=by[c]||[]).push(dd)}
