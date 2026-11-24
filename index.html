@@ -1060,7 +1060,7 @@ const ttStrip=o=>{const x=Object.assign({},o);delete x.u;return JSON.stringify(O
 function ttDiff(){const base=UI.ttBase||[],dr=UI.ttDraft||[];const bm=new Map(base.map(x=>[x.id,x]));
   const up=dr.filter(x=>!x.del&&(!bm.has(x.id)||ttStrip(bm.get(x.id))!==ttStrip(x)));
   const rm=base.filter(x=>!x.del&&!dr.some(y=>y.id===x.id&&!y.del)).map(x=>x.id);return{up,rm,n:up.length+rm.length}}
-function ttBanner(){const c=ttDiff();return `<div class="card" style="border:2px solid var(--accent)"><h2>✏️ 시간표 짜는 중 <span class="muted" style="font-size:12px;font-weight:400">초안 · 이 기기에만 저장</span></h2><div class="muted" style="margin-bottom:8px">아래 시간표에서 추가·수정·드래그해도 '시간표에 반영하기'를 누르기 전에는 실제 시간표가 바뀌지 않아요.</div><div class="row"><button class="btn pri" data-a="ttApplyAsk" ${c.n?'':'style="opacity:.5"'}>시간표에 반영하기${c.n?` (${c.n}건)`:''}</button><button class="btn" data-a="ttReset">현재 시간표로 되돌리기</button></div></div>`}
+function ttBanner(){const c=ttDiff();return `<div class="card" style="background:var(--accent2);border-left:5px solid var(--accent)"><h2>✏️ 시간표 짜는 중 <span class="muted" style="font-size:12px;font-weight:400">초안 · 이 기기에만 저장</span></h2><div class="muted" style="margin-bottom:8px">아래 시간표에서 추가·수정·드래그해도 '시간표에 반영하기'를 누르기 전에는 실제 시간표가 바뀌지 않아요.</div><div class="row"><button class="btn pri" data-a="ttApplyAsk" ${c.n?'':'style="opacity:.5"'}>시간표에 반영하기${c.n?` (${c.n}건)`:''}</button><button class="btn" data-a="ttReset">현재 시간표로 되돌리기</button></div></div>`}
 function vTTCost(){
   const ks=kids();
   const rows=SCHL().filter(e=>schedPaid(e)&&ks.some(k=>k.id===e.member)).sort((a,b)=>ks.findIndex(k=>k.id===a.member)-ks.findIndex(k=>k.id===b.member)||(a.start||'').localeCompare(b.start||''));
@@ -1068,26 +1068,27 @@ function vTTCost(){
   const dayTxt=e=>(e.days||[]).map(d=>WD[d]).join('·');
   const unitTxt=e=>e.unit==='session'?'회':'월';
   let base=0,sim=0;
+const kc=e=>e.color||({academy:'#e08a00',etc:'#8a8fa3'}[e.kind]||'var(--accent)');
   const pvRows=rows.map(e=>{const m=schedMonthly(e);base+=m;const off=TTPV.off.includes(e.id);if(!off)sim+=m;
-    return `<tr class="${off?'pvoff':''}"><td>${off?'삭제됨':'유지'}</td><td>${esc((mem(e.member)||{}).name||'')}</td><td>${esc(e.title)}</td><td class="r">${won(m)}</td><td class="r"><button class="btn sm" data-a="pvTog" data-id="${e.id}">${off?'되돌리기':'삭제해 보기'}</button></td></tr>`}).join('')
+    return `<div class="crow ${off?'pvoff':''}"><span class="bar" style="background:${kc(e)}"></span><div class="m"><div class="t">${(KIND[e.kind]||KIND.etc)[0]} ${esc(e.title)}</div><div class="s">${esc((mem(e.member)||{}).name||'')}</div></div><span class="tag">${off?'삭제됨':'유지'}</span><span class="amt">${won(m)}</span><button class="btn sm" data-a="pvTog" data-id="${e.id}">${off?'되돌리기':'삭제해 보기'}</button></div>`}).join('')
    +TTPV.add.map(a=>{const m=a.unit==='session'?a.cost*4*a.times:a.cost;sim+=m;
-    return `<tr class="pvadd"><td>추가됨</td><td>${esc((mem(a.member)||{}).name||'')}</td><td>${esc(a.name)}${a.unit==='session'?` (주 ${a.times}회)`:''}</td><td class="r">${won(m)}</td><td class="r"><button class="btn sm danger" data-a="pvRm" data-id="${a.id}">취소</button></td></tr>`}).join('');
+    return `<div class="crow pvadd"><span class="bar" style="background:var(--ok,#1f9d55)"></span><div class="m"><div class="t">${esc(a.name)}${a.unit==='session'?` (주 ${a.times}회)`:''}</div><div class="s">${esc((mem(a.member)||{}).name||'')}</div></div><span class="tag">추가됨</span><span class="amt">${won(m)}</span><button class="btn sm danger" data-a="pvRm" data-id="${a.id}">취소</button></div>`}).join('');
   const diff=sim-base;
-  const sty='<style>.ttc table{width:100%;border-collapse:collapse;font-size:14px}.ttc th,.ttc td{padding:7px 5px;border-bottom:1px solid var(--line,#eee);text-align:left}.ttc .r{text-align:right;font-variant-numeric:tabular-nums}.ttc .sum{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.ttc .sum>div{border:1px solid var(--line,#eee);border-radius:10px;padding:8px 12px;min-width:120px}.ttc .sum b{display:block;font-size:17px}.ttc tr.pvoff td{color:#aaa;text-decoration:line-through}.ttc tr.pvadd td{background:rgba(60,170,100,.1)}.ttc .pvf{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:8px}.ttc .pvf label{font-size:12px;display:flex;flex-direction:column;gap:3px}.ttc .pvf input,.ttc .pvf select{min-width:0}.ttc tr.rw{cursor:pointer}</style>';
+  const sty='<style>.ttc .sum{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px}.ttc .sum>div{flex:1;min-width:96px;padding:10px 10px!important;background:var(--card2);border-radius:12px;padding:10px 12px}.ttc .sum>div:first-child{background:var(--accent2)}.ttc .sum>div:first-child b{color:var(--accent)}.ttc .sum b{display:block;font-size:17px;white-space:nowrap;margin-top:2px;font-variant-numeric:tabular-nums}.ttc .crow{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}.ttc .crow.rw{cursor:pointer}.ttc .crow .bar{width:4px;align-self:stretch;min-height:32px;border-radius:4px;flex:none}.ttc .crow .m{flex:1;min-width:0}.ttc .crow .t{font-weight:600;word-break:keep-all}.ttc .crow .s{font-size:12.5px;color:var(--sub)}.ttc .crow .amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}.ttc .tag{font-size:11.5px;padding:2px 8px;border-radius:99px;background:var(--card2);color:var(--sub);flex:none}.ttc .pvoff .t,.ttc .pvoff .amt{text-decoration:line-through;color:var(--sub)}.ttc .pvoff .tag{background:color-mix(in srgb,var(--danger) 16%,var(--card));color:var(--danger)}.ttc .pvadd .tag{background:color-mix(in srgb,var(--ok,#1f9d55) 18%,var(--card));color:var(--ok,#1f9d55)}.ttc .pvf{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px;margin-bottom:10px}.ttc .pvf input,.ttc .pvf select{width:100%;margin:0;min-width:0}.ttc .note{margin-top:8px;font-size:12.5px;color:var(--sub)}</style>';
   return sty+`<div class="ttc">
   <div class="card"><h2>💰 비용 확인</h2>
    <div class="sum"><div><span class="muted">월 총 비용</span><b>${won(tot)}</b></div>${ks.map(k=>`<div><span class="muted">${esc(k.name)}</span><b>${won(per[k.id]||0)}</b></div>`).join('')}</div>
-   <table><thead><tr><th>아이</th><th>일정</th><th>요일</th><th>입력 비용</th><th class="r">월 환산</th></tr></thead><tbody>${rows.map(e=>`<tr class="rw" data-a="editSched" data-id="${e.id}"><td>${esc((mem(e.member)||{}).name||'')}</td><td>${(KIND[e.kind]||KIND.etc)[0]} ${esc(e.title)}</td><td>${dayTxt(e)}</td><td>${e.cost?won(e.cost)+' / '+unitTxt(e):'<span class="muted">미입력</span>'}</td><td class="r">${won(schedMonthly(e))}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">방과후·학원·기타 일정이 없어요</td></tr>'}</tbody></table>
-   <div class="muted" style="margin-top:6px">학교 일정은 제외돼요. 월납은 입력 금액 그대로, 회당은 금액 × 주 횟수(요일 수) × 4주로 계산해요. 줄을 누르면 비용을 수정할 수 있어요.</div></div>
+   ${rows.map(e=>`<div class="crow rw" data-a="editSched" data-id="${e.id}"><span class="bar" style="background:${kc(e)}"></span><div class="m"><div class="t">${(KIND[e.kind]||KIND.etc)[0]} ${esc(e.title)}</div><div class="s">${esc((mem(e.member)||{}).name||'')} · ${dayTxt(e)} · ${e.cost?won(e.cost)+' / '+unitTxt(e):'비용 미입력'}</div></div><span class="amt">${won(schedMonthly(e))}</span></div>`).join('')||'<div class="empty">방과후·학원·기타 일정이 없어요</div>'}
+   <div class="note">학교 일정은 제외돼요. 월납은 입력 금액 그대로, 회당은 금액 × 주 횟수(요일 수) × 4주로 계산해요. 줄을 누르면 비용을 수정할 수 있어요.</div></div>
   <div class="card"><h2>🔍 비용 미리보기 <span class="muted" style="font-size:12px;font-weight:400">실제 시간표는 바뀌지 않아요</span></h2>
-   <div class="pvf"><label>아이<select id="pv_kid">${ks.map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('')}</select></label>
-    <label>가상 일정<input type="text" id="pv_name" placeholder="예: 수영" style="width:110px"></label>
-    <label>금액(원)<input type="number" id="pv_cost" min="0" step="1000" inputmode="numeric" style="width:100px"></label>
-    <label>단위<select id="pv_unit"><option value="month">월납</option><option value="session">회당</option></select></label>
-    <label>주 횟수<input type="number" id="pv_times" min="1" max="7" value="1" style="width:60px"></label>
-    <button class="btn pri sm" data-a="pvAdd">＋ 추가해 보기</button><button class="btn sm" data-a="pvReset">초기화</button></div>
-   <div class="sum"><div><span class="muted">현재 월 비용</span><b>${won(base)}</b></div><div><span class="muted">미리보기 월 비용</span><b>${won(sim)}</b></div><div><span class="muted">변화</span><b style="color:${diff>0?'#c0392b':diff<0?'#2f7d4a':'inherit'}">${diff>0?'+':''}${won(diff)}</b></div></div>
-   <table><thead><tr><th>상태</th><th>아이</th><th>일정</th><th class="r">월 환산</th><th></th></tr></thead><tbody>${pvRows||'<tr><td colspan="5" class="muted">비교할 일정이 없어요</td></tr>'}</tbody></table></div></div>`}
+   <div class="pvf"><div><label class="l">아이</label><select id="pv_kid">${ks.map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('')}</select></div>
+    <div><label class="l">가상 일정</label><input type="text" id="pv_name" placeholder="예: 수영"></div>
+    <div><label class="l">금액(원)</label><input type="number" id="pv_cost" min="0" step="1000" inputmode="numeric" placeholder="0"></div>
+    <div><label class="l">단위</label><select id="pv_unit"><option value="month">월납</option><option value="session">회당</option></select></div>
+    <div><label class="l">주 횟수</label><input type="number" id="pv_times" min="1" max="7" value="1"></div></div>
+   <div class="row" style="margin-bottom:10px"><button class="btn pri sm" data-a="pvAdd">＋ 추가해 보기</button><button class="btn sm" data-a="pvReset">초기화</button></div>
+   <div class="sum"><div><span class="muted">현재 월 비용</span><b>${won(base)}</b></div><div><span class="muted">미리보기 월 비용</span><b>${won(sim)}</b></div><div><span class="muted">변화</span><b style="color:${diff>0?'var(--danger)':diff<0?'var(--ok,#1f9d55)':'inherit'}">${diff>0?'+':''}${won(diff)}</b></div></div>
+   ${pvRows||'<div class="empty">비교할 일정이 없어요</div>'}</div></div>`}
 const d_cls=(d,t)=>d===t?'today':'';
 function schedForm(e){
   const days=e.days||[],k=e.kind||'school';
