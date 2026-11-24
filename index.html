@@ -495,7 +495,7 @@ async function sync(manual){
   const g=gh();if(!g||S.busy)return;S.busy=true;
   try{
     const rem=await ghPull(g);
-    if(rem){const before=sig(D);const m=merge(D,rem);const changedLocal=sig(m)!==before;D=m;
+    if(rem){const before=sig(D);const m=merge(D,rem);const changedLocal=sig(m)!==before;D=m;chatNotify();
       if(changedLocal){saveLocal();if(!modalOpen())render()}
       if(g.token&&(dirty||sig(D)!==sig(rem)))await ghPush(g)}
     else if(g.token)await ghPush(g);
@@ -503,7 +503,7 @@ async function sync(manual){
   }catch(e){S.err=ghHint(e);if(manual)toast('동기화 실패: '+S.err,4000)}
   S.busy=false;updateBadge()}
 let pushT;function schedulePush(){if(!gh()||!gh().token)return;clearTimeout(pushT);pushT=setTimeout(()=>sync(false),2500)}
-setInterval(()=>{if(!document.hidden&&gh()&&!modalOpen())sync(false)},60000);
+setInterval(()=>{if((!document.hidden||UI.notif)&&gh()&&!modalOpen())sync(false)},60000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)UNLOCK=false;else{if(!modalOpen()){UI.sel=TODAY();UI.month=TODAY().slice(0,7);UI.chatDay='';CHATN=3;render()}sync(false)}});
 function updateBadge(){const b=$('#badge');if(!b)return;
   const g=gh();
@@ -900,6 +900,24 @@ function todoForm(t){
 const chatWho=()=>{const ms=members();if(meSel())return meSel();return (UI.who&&mem(UI.who)?UI.who:((ms[0]||{}).id))||''};
 const tmk=t=>new Date(t).toLocaleTimeString('ko-KR',{hour:'numeric',minute:'2-digit'});
 const chatAll=()=>live('chat').sort((x,y)=>x.t-y.t);
+/* --- 새 대화 알림 (앱이 열려 있을 때) --- */
+const NOTI=new Set(chatAll().map(m=>m.id));
+window.__swr=null;
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(()=>{});navigator.serviceWorker.ready.then(r=>{window.__swr=r}).catch(()=>{});
+  navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.tab==='chat'&&A.tab)A.tab({id:'chat'})})}
+async function notifyShow(title,body,tag){
+  const o={body,tag,icon:'icon-192.png',badge:'icon-192.png'};
+  try{if(window.__swr&&window.__swr.showNotification){await window.__swr.showNotification(title,o);return true}}catch(_){}
+  try{const n=new Notification(title,o);n.onclick=()=>{window.focus();n.close()};return true}catch(_){return false}}
+function chatNotify(){
+  const fresh=chatAll().filter(m=>!NOTI.has(m.id));fresh.forEach(m=>NOTI.add(m.id));
+  if(!UI.notif||!('Notification' in window)||Notification.permission!=='granted'||!ME||!mem(ME))return;
+  const lim=Date.now()-10*60e3;
+  fresh.filter(m=>m.by!==ME&&m.t>=lim&&(document.hidden||UI.tab!=='chat')).slice(-3).forEach(m=>{const a=mem(m.by);notifyShow('💬 '+(a?a.name:'가족 대화'),String(m.text||'').slice(0,100),'chat-'+m.id)})}
+function notifCard(){
+  const sup='Notification' in window,perm=sup?Notification.permission:'none',on=sup&&perm==='granted'&&UI.notif;
+  const st=!sup?'이 브라우저는 알림을 지원하지 않아요. 아이폰은 사파리에서 "홈 화면에 추가"한 앱으로 열어야 쓸 수 있어요.':perm==='denied'?'브라우저에서 알림이 차단돼 있어요. 주소창 옆 자물쇠(사이트 설정)에서 알림을 허용해 주세요.':on?'켜져 있어요. 다른 가족이 새 메시지를 보내면 알려드려요.':'꺼져 있어요.';
+  return `<div class="card"><h2>🔔 대화 알림 <span class="sp"></span><span class="chip ${on?'on':''}" style="cursor:default">${on?'켜짐':'꺼짐'}</span></h2><div class="muted" style="margin-bottom:8px">${st}</div><div class="row">${sup&&perm!=='denied'?`<button class="btn ${on?'':'pri'}" data-a="notifToggle">${on?'알림 끄기':'알림 켜기'}</button>`:''}${on?'<button class="btn" data-a="notifTest">테스트 알림</button>':''}</div><div class="muted" style="margin-top:8px;font-size:12.5px">앱(탭)을 열어 둔 동안 약 1분 안에 알려줘요. 이 기기에만 적용되고, 완전히 닫으면 오지 않아요.</div></div>`}
 const chatDayOf=()=>UI.chatDay||TODAY();
 const chatMsgs=(n,day)=>{const a=chatAll().filter(m=>ymd(new Date(m.t))===(day||TODAY()));return n?a.slice(-n):a};
 function bubbles(list,full){
@@ -1146,6 +1164,7 @@ function lockView(){
 function vSet(){
   if(isKidMe())return head('설정')+`<div class="grid g2"><div>
   <div class="card"><h2>🎨 테마</h2>${themeBox()}</div>
+  ${notifCard()}
   <div class="card"><h2>🙋 나는 누구?</h2><div class="muted">이 기기에서 홈 화면에 내 할 일만 보여줘요.</div>${memChips(ME?[ME]:[],'setMe',false,false)}</div>
   </div></div>`;
   if(D.settings.pwHash&&!UNLOCK)return lockView();
@@ -1154,6 +1173,7 @@ function vSet(){
   <div class="card"><h2>👨‍👩‍👧 가족 <span class="sp"></span><button class="btn sm pri" data-a="addMem">+ 추가</button></h2>${ms.map(m=>`<div class="ev" data-a="editMem" data-id="${m.id}" style="cursor:pointer"><div class="bar" style="background:${esc(m.color)}"></div><div><div class="t">${esc(m.emoji||'')} ${esc(m.name)} <span class="muted">${m.role==='child'?'아이':'어른'}${m.role==='child'&&m.birth?' · '+ageTxt(m.birth):''}</span></div><div class="muted">${m.role==='child'&&m.school&&m.school.name?'🏫 '+esc(m.school.name):''}</div></div></div>`).join('')||'<div class="empty">가족을 추가하세요</div>'}</div>
   <div class="card"><h2>🏷️ 홈 타이틀</h2><div class="muted" style="margin-bottom:6px">홈 화면 맨 위에 걸리는 제목이에요. 비우면 표시하지 않아요. 가족 모두에게 같이 보여요.</div><div class="row"><input type="text" id="pgTitle" maxlength="30" value="${esc(D.settings.title||'')}" placeholder="예: 김씨네 우리집" style="flex:1;margin:0" data-enter="saveTitle"><button class="btn pri" data-a="saveTitle">저장</button></div></div>
   <div class="card"><h2>🎨 테마</h2>${themeBox()}</div>
+  ${notifCard()}
   <div class="card"><h2>🙋 나는 누구?</h2><div class="muted">이 기기에서 홈 화면에 내 할 일만 보여줘요.</div>${memChips(ME?[ME]:[],'setMe',false,false)}</div>
   </div><div>
   <div class="card"><h2>🌤️ 날씨 (기상청)</h2><div class="muted">현재: ${esc((D.settings.wx||{}).name||'')}</div><div class="row"><input type="text" id="wxq" placeholder="도시·동네 이름 (예: 수원)" style="flex:1" data-enter="wxSearch"><button class="btn" data-a="wxSearch">검색</button></div><div id="wxres"></div><div class="muted" style="margin-top:8px">기상청(KMA) 예보 모델 데이터를 사용해요.</div></div>
@@ -1239,6 +1259,8 @@ const A={
  schedKind(d,el){const b=$('#f_costBox');if(b)b.style.display=el.value==='school'?'none':'block'},
  ttCost(){if(isKidMe())return;if(!Array.isArray(UI.ttDraft)){UI.ttBase=JSON.parse(JSON.stringify(live('sched')));UI.ttDraft=JSON.parse(JSON.stringify(UI.ttBase))}UI.ttView='cost';saveUI();render();window.scrollTo(0,0)},
  ttBack(){UI.ttView='';saveUI();render()},
+ async notifToggle(){if(!('Notification' in window)){toast('이 브라우저는 알림을 지원하지 않아요');return}if(UI.notif){UI.notif=false;saveUI();render();return}let p=Notification.permission;if(p==='default')p=await Notification.requestPermission();if(p==='granted'){UI.notif=true;saveUI();render();toast('알림을 켰어요');notifyShow('💬 알림이 켜졌어요','새 메시지가 오면 이렇게 알려드려요','test')}else{render();toast('알림이 허용되지 않았어요')}},
+ notifTest(){notifyShow('💬 알림 테스트','이렇게 알려드려요','test')},
  ttReset(){if(isKidMe())return;UI.ttBase=JSON.parse(JSON.stringify(live('sched')));UI.ttDraft=JSON.parse(JSON.stringify(UI.ttBase));saveUI();render();toast('현재 시간표로 되돌렸어요')},
  ttApplyAsk(){if(isKidMe())return;const c=ttDiff();if(!c.n){toast('바뀐 내용이 없어요');return}
    openModal(`<h2>시간표에 반영할까요?</h2><div style="margin:8px 0 14px">추가·수정 <b>${c.up.length}</b>건 · 삭제 <b>${c.rm.length}</b>건이 실제 시간표에 적용돼요.<div class="muted">가족 모두의 시간표가 바뀌어요.</div></div><div class="row"><button class="btn pri" style="flex:1" data-a="ttApply">반영하기</button><button class="btn" data-a="close">취소</button></div>`)},
