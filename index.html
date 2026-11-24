@@ -946,7 +946,12 @@ document.addEventListener('scroll',e=>{const el=e.target;if(!el||!el.matches||!e
 function ttRec(mid){return D.tt.find(x=>x.id===mid&&!x.del)||{id:mid,n:6,cells:{}}}
 const KIND={school:['📚','학교'],after:['🎒','방과후'],academy:['🎨','학원'],etc:['📌','기타']};
 const WD=['월','화','수','목','금','토','일'];
-const kidSched=(mid,d)=>live('sched').filter(x=>x.member===mid&&(d==null||(x.days||[]).includes(d))).sort((x,y)=>(x.start||'').localeCompare(y.start||''));
+const inDraft=()=>UI.tab==='tt'&&UI.ttView==='cost'&&!isKidMe()&&Array.isArray(UI.ttDraft);
+const SCHL=()=>inDraft()?UI.ttDraft.filter(x=>!x.del):live('sched');
+const schUp=o=>{if(inDraft()){o.u=Date.now();const a=UI.ttDraft,i=a.findIndex(x=>x.id===o.id);if(i<0)a.push(o);else a[i]=o;saveUI();render()}else upsert('sched',o)};
+const schRm=id=>{if(inDraft()){UI.ttDraft=UI.ttDraft.filter(x=>x.id!==id);saveUI();render()}else removeItem('sched',id)};
+const schFind=id=>SCHL().find(x=>x.id===id);
+const kidSched=(mid,d)=>SCHL().filter(x=>x.member===mid&&(d==null||(x.days||[]).includes(d))).sort((x,y)=>(x.start||'').localeCompare(y.start||''));
 const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
 const ttNarrow=()=>window.matchMedia&&matchMedia('(max-width:700px)').matches;
 const ttMin=x=>{const[a,b]=(x||'0:0').split(':').map(Number);return a*60+(b||0)};
@@ -954,7 +959,7 @@ function ttBlocks(cid,d,H0,HH,hm,today){
   const it=kidSched(cid,d).map(e=>({e,s:ttMin(e.start),f:Math.max(ttMin(e.end)||ttMin(e.start)+50,ttMin(e.start)+40),l:0,n:1}));
   it.forEach((a,x)=>{const used=new Set();it.forEach((b,y)=>{if(y<x&&b.s<a.f&&a.s<b.f)used.add(b.l)});let l=0;while(used.has(l))l++;a.l=l});
   it.forEach(a=>{let n=a.l+1;it.forEach(b=>{if(b.s<a.f&&a.s<b.f)n=Math.max(n,b.l+1)});a.n=n});
-  return it.map(({e,s:st,f,l,n})=>`${st%60===0?`<i class="gm" style="top:${(st-H0*60)/60*HH-1}px"></i>`:''}${f%60===0?`<i class="gm" style="top:${(f-H0*60)/60*HH-1}px"></i>`:''}<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)"${isKidMe()?'':` data-a="editSched" data-id="${e.id}" data-sid="${e.id}"`}><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}${isKidMe()?'':'<i class="rsz"></i>'}</div>`).join('')}
+  return it.map(({e,s:st,f,l,n})=>`${st%60===0?`<i class="gm" style="top:${(st-H0*60)/60*HH-1}px"></i>`:''}${f%60===0?`<i class="gm" style="top:${(f-H0*60)/60*HH-1}px"></i>`:''}<div class="sev k-${e.kind||'school'} ${e.color?'ec':''} ${d===today&&e.start<=hm&&hm<(e.end||'24:00')?'now':''}" style="${e.color?`--ec:${e.color};`:''}top:${(st-H0*60)/60*HH}px;height:${(f-st)/60*HH-2}px;left:calc(${l*100/n}% + 1px);width:calc(${100/n}% - 2px)"${inDraft()?` data-a="editSched" data-id="${e.id}" data-sid="${e.id}"`:''}><div class="tm">${esc(e.start||'')}${e.end?' ~ '+esc(e.end):''}</div><div class="ti">${(KIND[e.kind]||KIND.school)[0]} ${esc(e.title)}</div>${e.place?`<div class="pl">${esc(e.place)}</div>`:''}${inDraft()?'<i class="rsz"></i>':''}</div>`).join('')}
 /* --- 시간표 드래그: 길이 조절 · 시간/요일/아이 이동 · 삭제 --- */
 (function(){
   const HH=64,SNAP=5;let S=null,LAST=0;
@@ -969,7 +974,7 @@ function ttBlocks(cid,d,H0,HH,hm,today){
   document.addEventListener('pointerdown',e=>{
     if(S||isKidMe()||(e.pointerType==='mouse'&&e.button!==0))return;
     const bl=e.target.closest&&e.target.closest('.sev[data-sid]');if(!bl)return;
-    const it=D.sched.find(x=>x.id===bl.dataset.sid&&!x.del);if(!it)return;const g=bl.closest('.tgb');if(!g)return;
+    const it=schFind(bl.dataset.sid);if(!it)return;const g=bl.closest('.tgb');if(!g)return;
     const s0=ttMin(it.start),e0=ttMin(it.end)||0,f0=Math.max(e0||s0+50,s0+40);
     S={el:bl,it,mode:e.target.closest('.rsz')?'rs':'mv',x0:e.clientX,y0:e.clientY,g,day:+g.dataset.d,mem:g.dataset.m,s0,e0,f0,touch:e.pointerType==='touch',active:false,dm:0,tg:g,trash:false};
     if(S.touch&&S.mode==='mv')S.timer=setTimeout(()=>{if(S&&!S.active)begin()},350);
@@ -1009,7 +1014,7 @@ function ttBlocks(cid,d,H0,HH,hm,today){
           else if(+tg.dataset.d!==st.day){const nd=+tg.dataset.d;o.days=[...new Set((o.days||[]).map(x=>x===st.day?nd:x))].sort();ch=true}}
       }
     }
-    if(ch)upsert('sched',o);else render()}
+    if(ch)schUp(o);else render()}
   document.addEventListener('pointerup',e=>finish(e,false));
   document.addEventListener('pointercancel',e=>finish(e,true));
   document.addEventListener('click',e=>{if(Date.now()-LAST<200){e.stopPropagation();e.preventDefault()}},true);
@@ -1017,9 +1022,9 @@ function ttBlocks(cid,d,H0,HH,hm,today){
   function confirmDel(it){openModal(`<h2>일정을 삭제할까요?</h2><div style="margin:8px 0 14px"><b>${esc(it.title)}</b><div class="muted">${esc(it.start||'')}${it.end?' ~ '+esc(it.end):''}</div></div><div class="row"><button class="btn danger" style="flex:1" data-a="delSchedYes" data-id="${it.id}">삭제</button><button class="btn" data-a="close">취소</button></div>`)}
 })();
 function ttAxis(H0,H1,HH){return `<div class="tgl"><div class="sp"></div><div class="tgx" style="height:${(H1-H0)*HH}px">${Array.from({length:H1-H0},(_,k)=>`<div class="hl" style="top:${k*HH}px">${String(H0+k).padStart(2,'0')}:00</div>`).join('')}</div></div>`}
-function ttTopBtn(){return isKidMe()?'':`<button class="btn sm" data-a="ttCost" style="margin-left:auto">시간표짜기</button>`}
+function ttTopBtn(){return isKidMe()?`<button class="btn sm" disabled title="어른 계정에서만 쓸 수 있어요" style="margin-left:auto;opacity:.45;cursor:not-allowed">시간표짜기</button>`:`<button class="btn sm" data-a="ttCost" style="margin-left:auto">시간표짜기</button>`}
 function vTT(){
-  if(UI.ttView==='cost'&&!isKidMe()){UI.ttView='';const m=vTTMain();UI.ttView='cost';return m.replace('<h1>시간표</h1>','<h1>시간표짜기</h1>').replace(ttTopBtn(),'<button class="btn sm" data-a="ttBack" style="margin-left:auto">‹ 시간표</button>')+vTTCost()}
+  if(UI.ttView==='cost'&&!isKidMe()){if(!Array.isArray(UI.ttDraft)){UI.ttBase=JSON.parse(JSON.stringify(live('sched')));UI.ttDraft=JSON.parse(JSON.stringify(UI.ttBase))}const m=vTTMain();return m.replace('<h1>시간표</h1>','<h1>시간표짜기</h1>').replace('<div class="card">'+'',ttBanner()+'<div class="card">').replace(ttTopBtn(),'<button class="btn sm" data-a="ttBack" style="margin-left:auto">‹ 시간표</button>')+vTTCost()}
   return vTTMain()}
 function vTTMain(){
   const ks=kids();if(!ks.length)return head('시간표',ttTopBtn())+'<div class="empty">시간표는 "아이"로 등록한 가족만 사용해요.<br>설정에서 구분을 "아이"로 지정해 주세요</div>';
@@ -1033,7 +1038,7 @@ function vTTMain(){
     const cols=sel.map(id=>{const m=mem(id);return `<div class="sgc mkc ${d_cls(selD,today)}"><div class="mkh">${avatar(m,22)}<b>${esc(m.name)}</b></div><div class="tgb" data-h0="${H0}" data-d="${selD}" data-m="${id}" style="height:${(H1-H0)*HH}px">${ttBlocks(id,selD,H0,HH,hm,today)}</div></div>`}).join('');
     return head('시간표',ttTopBtn())+(ks.length>2?`<div class="chips">${ks.map(m=>`<span class="chip ${sel.includes(m.id)?'on':''}" data-a="ttPick" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div><div class="muted" style="margin:-4px 0 8px">두 명까지 함께 볼 수 있어요</div>`:'')+
     `<div class="card">${dtabs}<div class="sg tg mk">${ttAxis(H0,H1,HH)}${cols}</div>
-    ${isKidMe()?'':`<div class="row" style="margin-top:10px">${sel.map(id=>`<button class="btn pri sm" data-a="addSched" data-id="${id}" data-d="${selD}">+ ${esc(mem(id).name)}</button>`).join('')}<span class="muted">일정을 누르면 수정·삭제할 수 있어요</span></div>`}</div>`}
+    ${!inDraft()?'':`<div class="row" style="margin-top:10px">${sel.map(id=>`<button class="btn pri sm" data-a="addSched" data-id="${id}" data-d="${selD}">+ ${esc(mem(id).name)}</button>`).join('')}<span class="muted">일정을 누르면 수정·삭제할 수 있어요</span></div>`}</div>`}
   const cur=UI.ttM&&mem(UI.ttM)?UI.ttM:ks[0].id;const all=kidSched(cur);
   const nd=all.some(x=>(x.days||[]).some(d=>d>=5))||selD>=5?7:5;
   let lo=9*60,hi=17*60;all.forEach(e=>{lo=Math.min(lo,ttMin(e.start));hi=Math.max(hi,ttMin(e.end)||ttMin(e.start)+50)});
@@ -1044,16 +1049,21 @@ function vTTMain(){
   return head('시간표',ttTopBtn())+`<div class="chips">${ks.map(m=>`<span class="chip ${m.id===cur?'on':''}" data-a="ttM" data-id="${m.id}">${memDot(m)}${esc(m.name)}</span>`).join('')}</div>
   <div class="card">${dtabs}
   <div class="sg tg" style="--nd:${nd}">${cols}</div>
-  ${isKidMe()?'':`<div class="row" style="margin-top:10px"><button class="btn pri sm" data-a="addSched" data-id="${cur}" data-d="${selD}">+ 일정 추가</button>${hasLegacy?`<button class="btn sm" data-a="impTT" data-id="${cur}">기존 교시표 가져오기</button>`:''}<span class="muted">시간 기준으로 학교 수업·학원 일정을 적어요. 일정을 누르면 수정·삭제할 수 있어요</span></div>`}</div>`}
+  ${!inDraft()?'':`<div class="row" style="margin-top:10px"><button class="btn pri sm" data-a="addSched" data-id="${cur}" data-d="${selD}">+ 일정 추가</button>${hasLegacy?`<button class="btn sm" data-a="impTT" data-id="${cur}">기존 교시표 가져오기</button>`:''}<span class="muted">시간 기준으로 학교 수업·학원 일정을 적어요. 일정을 누르면 수정·삭제할 수 있어요</span></div>`}</div>`}
 
 /* --- 시간표: 비용 확인 · 미리보기 --- */
 let TTPV={off:[],add:[]};
 const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
 const schedPaid=e=>(e.kind||'school')!=='school';
 const schedMonthly=e=>e.unit==='session'?(e.cost||0)*4*Math.max(1,(e.days||[]).length):(e.cost||0);
+const ttStrip=o=>{const x=Object.assign({},o);delete x.u;return JSON.stringify(Object.keys(x).sort().map(k=>[k,x[k]]))};
+function ttDiff(){const base=UI.ttBase||[],dr=UI.ttDraft||[];const bm=new Map(base.map(x=>[x.id,x]));
+  const up=dr.filter(x=>!x.del&&(!bm.has(x.id)||ttStrip(bm.get(x.id))!==ttStrip(x)));
+  const rm=base.filter(x=>!x.del&&!dr.some(y=>y.id===x.id&&!y.del)).map(x=>x.id);return{up,rm,n:up.length+rm.length}}
+function ttBanner(){const c=ttDiff();return `<div class="card" style="border:2px solid var(--accent)"><h2>✏️ 시간표 짜는 중 <span class="muted" style="font-size:12px;font-weight:400">초안 · 이 기기에만 저장</span></h2><div class="muted" style="margin-bottom:8px">아래 시간표에서 추가·수정·드래그해도 '시간표에 반영하기'를 누르기 전에는 실제 시간표가 바뀌지 않아요.</div><div class="row"><button class="btn pri" data-a="ttApplyAsk" ${c.n?'':'style="opacity:.5"'}>시간표에 반영하기${c.n?` (${c.n}건)`:''}</button><button class="btn" data-a="ttReset">현재 시간표로 되돌리기</button></div></div>`}
 function vTTCost(){
   const ks=kids();
-  const rows=live('sched').filter(e=>schedPaid(e)&&ks.some(k=>k.id===e.member)).sort((a,b)=>ks.findIndex(k=>k.id===a.member)-ks.findIndex(k=>k.id===b.member)||(a.start||'').localeCompare(b.start||''));
+  const rows=SCHL().filter(e=>schedPaid(e)&&ks.some(k=>k.id===e.member)).sort((a,b)=>ks.findIndex(k=>k.id===a.member)-ks.findIndex(k=>k.id===b.member)||(a.start||'').localeCompare(b.start||''));
   const per={};let tot=0;rows.forEach(e=>{const m=schedMonthly(e);tot+=m;per[e.member]=(per[e.member]||0)+m});
   const dayTxt=e=>(e.days||[]).map(d=>WD[d]).join('·');
   const unitTxt=e=>e.unit==='session'?'회':'월';
@@ -1226,25 +1236,32 @@ const A={
  ttM(d){UI.ttM=d.id;saveUI();render()},
  ttDay(d){UI.ttDay=+d.id;saveUI();render()},
  schedKind(d,el){const b=$('#f_costBox');if(b)b.style.display=el.value==='school'?'none':'block'},
- ttCost(){if(isKidMe())return;UI.ttView='cost';saveUI();render();window.scrollTo(0,0)},
+ ttCost(){if(isKidMe())return;if(!Array.isArray(UI.ttDraft)){UI.ttBase=JSON.parse(JSON.stringify(live('sched')));UI.ttDraft=JSON.parse(JSON.stringify(UI.ttBase))}UI.ttView='cost';saveUI();render();window.scrollTo(0,0)},
  ttBack(){UI.ttView='';saveUI();render()},
+ ttReset(){if(isKidMe())return;UI.ttBase=JSON.parse(JSON.stringify(live('sched')));UI.ttDraft=JSON.parse(JSON.stringify(UI.ttBase));saveUI();render();toast('현재 시간표로 되돌렸어요')},
+ ttApplyAsk(){if(isKidMe())return;const c=ttDiff();if(!c.n){toast('바뀐 내용이 없어요');return}
+   openModal(`<h2>시간표에 반영할까요?</h2><div style="margin:8px 0 14px">추가·수정 <b>${c.up.length}</b>건 · 삭제 <b>${c.rm.length}</b>건이 실제 시간표에 적용돼요.<div class="muted">가족 모두의 시간표가 바뀌어요.</div></div><div class="row"><button class="btn pri" style="flex:1" data-a="ttApply">반영하기</button><button class="btn" data-a="close">취소</button></div>`)},
+ ttApply(){if(isKidMe())return;const c=ttDiff();$('#modal').classList.remove('on');$('#box').innerHTML='';
+   c.up.forEach(o=>{const x=JSON.parse(JSON.stringify(o));x.u=Date.now();const a=D.sched,i=a.findIndex(y=>y.id===x.id);if(i<0)a.push(x);else a[i]=x});
+   c.rm.forEach(id=>{const o=D.sched.find(x=>x.id===id);if(o){o.del=true;o.u=Date.now()}});
+   UI.ttDraft=null;UI.ttBase=null;UI.ttView='';saveUI();changed();toast('시간표에 반영했어요')},
  pvTog(d){const i=TTPV.off.indexOf(d.id);if(i<0)TTPV.off.push(d.id);else TTPV.off.splice(i,1);render()},
  pvRm(d){TTPV.add=TTPV.add.filter(a=>a.id!==d.id);render()},
  pvReset(){TTPV={off:[],add:[]};render()},
  pvAdd(){const name=val('pv_name').trim()||'새 일정';TTPV.add.push({id:uid(),member:val('pv_kid'),name,cost:+val('pv_cost')||0,unit:val('pv_unit')==='session'?'session':'month',times:Math.max(1,+val('pv_times')||1)});render()},
  addSched(d){if(isKidMe())return;schedForm({member:d.id,days:[+d.d>=0?+d.d:0]})},
- editSched(d){if(isKidMe())return;const e=D.sched.find(x=>x.id===d.id);if(e)schedForm(e)},
+ editSched(d){if(isKidMe())return;const e=schFind(d.id);if(e)schedForm(e)},
  saveSched(d){if(isKidMe())return;const title=val('f_t').trim();if(!title){toast('내용을 입력하세요');return}
    const days=[...document.querySelectorAll('#f_days .chip.on')].map(c=>+c.dataset.id).sort();if(!days.length){toast('요일을 선택하세요');return}
    const start=val('f_s'),end=val('f_e');if(!start){toast('시작 시간을 입력하세요');return}if(end&&end<=start){toast('끝 시간이 시작보다 늦어야 해요');return}
    const o={id:d.id||uid(),member:d.m,title,kind:val('f_k')||'school',days,start,end,place:val('f_p').trim(),cost:(val('f_k')||'school')==='school'?0:(+val('f_cost')||0),unit:val('f_unit')==='session'?'session':'month',color:((document.querySelector('#f_scol .chip.on')||{dataset:{}}).dataset.id||'')};
-   $('#modal').classList.remove('on');upsert('sched',o);$('#box').innerHTML=''},
- delSchedYes(d){if(isKidMe())return;$('#modal').classList.remove('on');$('#box').innerHTML='';removeItem('sched',d.id)},
- delSched(d,el){if(isKidMe())return;if(!el.dataset.sure){el.dataset.sure='1';el.textContent='한 번 더 누르면 삭제';return}$('#modal').classList.remove('on');removeItem('sched',d.id)},
+   $('#modal').classList.remove('on');$('#box').innerHTML='';schUp(o)},
+ delSchedYes(d){if(isKidMe())return;$('#modal').classList.remove('on');$('#box').innerHTML='';schRm(d.id)},
+ delSched(d,el){if(isKidMe())return;if(!el.dataset.sure){el.dataset.sure='1';el.textContent='한 번 더 누르면 삭제';return}$('#modal').classList.remove('on');$('#box').innerHTML='';schRm(d.id)},
  impTT(d){if(isKidMe())return;const r=ttRec(d.id);const to=m=>pad(Math.floor(m/60))+':'+pad(m%60);let n=0;
    for(let p=1;p<=r.n;p++){const st=540+(p-1)*50;const by={};for(let dd=0;dd<5;dd++){const c=r.cells[dd+'-'+p];if(c)(by[c]=by[c]||[]).push(dd)}
-     Object.entries(by).forEach(([t,days])=>{D.sched.push({id:uid(),member:d.id,title:t,kind:'school',days,start:to(st),end:to(st+40),place:'',u:Date.now()});n++})}
-   changed();toast(n+'개 가져왔어요 (1교시 09:00, 40분 수업 기준 · 시간은 수정할 수 있어요)')},
+     Object.entries(by).forEach(([t,days])=>{(inDraft()?UI.ttDraft:D.sched).push({id:uid(),member:d.id,title:t,kind:'school',days,start:to(st),end:to(st+40),place:'',u:Date.now()});n++})}
+   if(inDraft()){saveUI();render()}else changed();toast(n+'개 가져왔어요 (1교시 09:00, 40분 수업 기준 · 시간은 수정할 수 있어요)')},
  mealTab(d){UI.mealTab=d.id;saveUI();render()},
  mealOff(d){UI.mealOff+=+d.id;saveUI();render()},
  hM(d){UI.hM=d.id;saveUI();render()},
